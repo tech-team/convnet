@@ -1,9 +1,6 @@
-import tornado
-import tornado.web
-
-from ConvNetWeb import settings
+from ConvNetWeb.handlers.BaseHandler import BaseHandler
 
 
-class MainHandler(tornado.web.RequestHandler):
+class MainHandler(BaseHandler):
     def get(self):
-        self.render('index.html', debug=settings.DEBUG)
+        self.render('index.html')
