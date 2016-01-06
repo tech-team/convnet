@@ -1,0 +1,25 @@
+{
+  "name": "convnet-web",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "igorcoding <igorcoding@gmail.com>",
+    "alekseyl1992 <alekseyl@list.ru>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/tech-team/convnet",
+  "moduleType": [],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.4",
+    "lodash": "~3.10.1",
+    "almond": "~0.3.1",
+    "requirejs": "~2.1.22"
+  }
+}

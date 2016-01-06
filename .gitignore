@@ -58,3 +58,6 @@ target/
 
 # Custom
 .idea/
+ConvNetWeb/node_modules/
+ConvNetWeb/bower_components/
+ConvNetWeb/static/build/

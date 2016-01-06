@@ -3,8 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>ConvNet WebApp</title>
+
 </head>
 <body>
     <p>Hello there!</p>
+    <script>
+        console.time('load');
+    </script>
+    <script type="application/javascript" src="/static/build/build.min.js"></script>
+    <script>
+        require(['main'], function(){
+            console.timeEnd('load');
+        });
+    </script>
 </body>
 </html>
