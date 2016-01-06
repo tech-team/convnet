@@ -32,13 +32,60 @@ module.exports = function(grunt) {
           include: ['../../bower_components/almond/almond.js']
         }
       }
+    },
+
+    bower_concat: {
+      libs: {
+        cssDest: 'static/build/libs.min.css',
+        exclude: [
+          'almond',
+          'requirejs',
+          'jquery',
+          'lodash'
+        ],
+        mainFiles: {
+          bootstrap: ['dist/css/bootstrap.css']
+        },
+        dependencies: {
+          //'backbone': 'underscore',
+          //'jquery-mousewheel': 'jquery'
+        },
+        bowerOptions: {
+          //relative: false
+        }
+      }
+    },
+
+    cssmin: {
+      options: {
+        shorthandCompacting: false,
+        roundingPrecision: -1,
+        sourceMap: true
+      },
+      libs: {
+        src: ['static/build/libs.min.css'],
+        dest: 'static/build/libs.min.css',
+        options: {
+          sourceMap: false
+        }
+      },
+      css: {
+        src: ['static/css/**/*.css'],
+        dest: 'static/build/build.min.css'
+      }
     }
+
   });
 
   grunt.loadNpmTasks('grunt-bower-requirejs');
+  grunt.loadNpmTasks('grunt-bower-concat');
   grunt.loadNpmTasks('grunt-contrib-requirejs');
   grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-contrib-cssmin');
 
-  grunt.registerTask('buildjs', ['clean', 'bowerRequirejs', 'requirejs']);
+  grunt.registerTask('build:css', ['bower_concat', 'cssmin']);
+  grunt.registerTask('build:js', ['bowerRequirejs', 'requirejs']);
+  grunt.registerTask('build', ['build:css', 'build:js']);
   grunt.registerTask('default', []);
 };
