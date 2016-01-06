@@ -1,4 +1,3 @@
-import os
 import logging
 
 import tornado.ioloop
@@ -6,23 +5,20 @@ import tornado.web
 import tornado.options
 
 import ConvNetWeb.handlers
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+import settings
 
 
 def make_app():
-    settings = {
-        'template_path': os.path.join(BASE_DIR, 'templates'),
-        'debug': True
+    s = {
+        'debug': settings.DEBUG,
+        'template_path': settings.TEMPLATES_DIR,
+        'static_path': settings.STATIC_DIR,
+        'static_url_prefix': settings.STATIC_PREFIX
     }
-
-    if settings['debug']:
-        settings['static_path'] = os.path.join(BASE_DIR, 'dist')
-        settings['static_url_prefix'] = '/static/'
 
     return tornado.web.Application([
         (r"/", ConvNetWeb.handlers.MainHandler),
-    ], **settings)
+    ], **s)
 
 if __name__ == "__main__":
     logging.basicConfig(format='[%(asctime)s] %(levelname)s: %(message)s', level=logging.INFO)

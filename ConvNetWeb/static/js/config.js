@@ -1,17 +1,31 @@
 require.config({
     urlArgs: "_=",
-    baseUrl: "js",
+    baseUrl: "static/js",
     paths: {
-        jquery: "../../bower_components/jquery/dist/jquery",
-        lodash: "../../bower_components/lodash/lodash",
-        bootstrap: "../../bower_components/bootstrap/dist/js/bootstrap"
+        jquery: "../components/jquery/dist/jquery",
+        bootstrap: "../components/bootstrap/dist/js/bootstrap",
+        backbone: "../components/backbone/backbone",
+        underscore: "../components/underscore/underscore",
+        lodash: "../components/lodash/lodash"
     },
     shim: {
+        underscore: {
+            exports: "_"
+        },
         lodash: {
             exports: "_"
         },
-        jquery: {
-            exports: "$"
+        bootstrap: {
+            deps: [
+                "jquery"
+            ]
+        },
+        backbone: {
+            exports: "Backbone",
+            deps: [
+                "jquery",
+                "underscore"
+            ]
         }
     },
     packages: [
@@ -20,7 +34,9 @@ require.config({
 });
 
 define([
+    'backbone',
     'main'
-], function() {
+], function(Backbone, main) {
+    Backbone.history.start();
     window.DEBUG = true;
 });

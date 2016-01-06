@@ -29,7 +29,7 @@ module.exports = function(grunt) {
           generateSourceMaps: true,
           preserveLicenseComments: false,
           out: 'dist/js/build.min.js',
-          include: ['../../bower_components/almond/almond.js']
+          include: ['../components/almond/almond.js']
         }
       }
     },
@@ -40,7 +40,7 @@ module.exports = function(grunt) {
           {
             expand: true,
             flatten: true,
-            src: ['bower_components/**/dist/fonts/*'],
+            src: ['static/components/**/dist/fonts/*'],
             dest: 'dist/fonts/',
             filter: 'isFile'
           }
@@ -111,8 +111,8 @@ module.exports = function(grunt) {
         livereload: true
       },
       js: {
-        files: ['static/js/**/*.js'],
-        tasks: ['build:js'],
+        files: ['static/js/**/*.js', '!static/js/config.js'],
+        tasks: [''],
         options: {
           spawn: false
         }
@@ -140,5 +140,5 @@ module.exports = function(grunt) {
   grunt.registerTask('build:css', ['bower_concat', 'cssmin']);
   grunt.registerTask('build:js', ['bowerRequirejs', 'requirejs']);
   grunt.registerTask('build', ['copy', 'build:css', 'build:js']);
-  grunt.registerTask('default', ['build', 'watch']);
+  grunt.registerTask('default', ['watch']);
 };
