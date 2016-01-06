@@ -104,6 +104,26 @@ module.exports = function(grunt) {
         src: ['static/css/**/*.css'],
         dest: 'dist/css/build.min.css'
       }
+    },
+
+    watch: {
+      options: {
+        livereload: true
+      },
+      js: {
+        files: ['static/js/**/*.js'],
+        tasks: ['build:js'],
+        options: {
+          spawn: false
+        }
+      },
+      css: {
+        files: ['static/css/**/*.css'],
+        tasks: ['build:css'],
+        options: {
+          spawn: false
+        }
+      }
     }
 
   });
@@ -115,9 +135,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.registerTask('build:css', ['bower_concat', 'cssmin']);
   grunt.registerTask('build:js', ['bowerRequirejs', 'requirejs']);
   grunt.registerTask('build', ['copy', 'build:css', 'build:js']);
-  grunt.registerTask('default', []);
+  grunt.registerTask('default', ['build', 'watch']);
 };
