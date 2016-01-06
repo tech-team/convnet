@@ -60,4 +60,4 @@ target/
 .idea/
 ConvNetWeb/node_modules/
 ConvNetWeb/bower_components/
-ConvNetWeb/static/build/
+ConvNetWeb/dist

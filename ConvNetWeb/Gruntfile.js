@@ -2,9 +2,9 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     clean: {
-      build: ['static/build/'],
+      build: ['dist/'],
       dev: {
-        src: ['static/build/**/*']
+        src: ['dist/**/*']
       }
     },
 
@@ -28,15 +28,46 @@ module.exports = function(grunt) {
           mangle: false,
           generateSourceMaps: true,
           preserveLicenseComments: false,
-          out: 'static/build/build.min.js',
+          out: 'dist/js/build.min.js',
           include: ['../../bower_components/almond/almond.js']
         }
       }
     },
 
+    copy: {
+      bower_fonts: {
+        files: [
+          {
+            expand: true,
+            flatten: true,
+            src: ['bower_components/**/dist/fonts/*'],
+            dest: 'dist/fonts/',
+            filter: 'isFile'
+          }
+        ]
+      },
+      app: {
+        files: [
+          {
+            expand: true,
+            flatten: true,
+            src: ['static/fonts/**/*'],
+            dest: 'dist/fonts/'
+          },
+
+          {
+            expand: true,
+            flatten: true,
+            src: ['static/img/**/*'],
+            dest: 'dist/img/'
+          }
+        ]
+      }
+    },
+
     bower_concat: {
       libs: {
-        cssDest: 'static/build/libs.min.css',
+        cssDest: 'dist/css/libs.min.css',
         exclude: [
           'almond',
           'requirejs',
@@ -63,15 +94,15 @@ module.exports = function(grunt) {
         sourceMap: true
       },
       libs: {
-        src: ['static/build/libs.min.css'],
-        dest: 'static/build/libs.min.css',
+        src: ['dist/css/libs.min.css'],
+        dest: 'dist/css/libs.min.css',
         options: {
           sourceMap: false
         }
       },
       css: {
         src: ['static/css/**/*.css'],
-        dest: 'static/build/build.min.css'
+        dest: 'dist/css/build.min.css'
       }
     }
 
@@ -83,9 +114,10 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
+  grunt.loadNpmTasks('grunt-contrib-copy');
 
   grunt.registerTask('build:css', ['bower_concat', 'cssmin']);
   grunt.registerTask('build:js', ['bowerRequirejs', 'requirejs']);
-  grunt.registerTask('build', ['build:css', 'build:js']);
+  grunt.registerTask('build', ['copy', 'build:css', 'build:js']);
   grunt.registerTask('default', []);
 };

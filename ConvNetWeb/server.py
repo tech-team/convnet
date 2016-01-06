@@ -17,7 +17,7 @@ def make_app():
     }
 
     if settings['debug']:
-        settings['static_path'] = os.path.join(BASE_DIR, 'static')
+        settings['static_path'] = os.path.join(BASE_DIR, 'dist')
         settings['static_url_prefix'] = '/static/'
 
     return tornado.web.Application([
