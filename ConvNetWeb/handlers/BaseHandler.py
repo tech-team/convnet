@@ -11,7 +11,6 @@ class BaseHandler(tornado.web.RequestHandler):
     def __init__(self, application, request, **kwargs):
         super(BaseHandler, self).__init__(application, request, **kwargs)
         self.context = {}
-        self.body_json = None
 
     def prepare(self):
         self.context = {
@@ -35,5 +34,5 @@ class BaseHandler(tornado.web.RequestHandler):
         for k, v in self.context.iteritems():
             if k not in kwargs:
                 kwargs[k] = v
-        super(BaseHandler, self).render(template_name, **kwargs)
+        return super(BaseHandler, self).render(template_name, **kwargs)
 

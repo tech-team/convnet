@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}ConvNet WebApp{% end %}</title>
+    {% if debug %}
+        <link type="text/css" rel="stylesheet" href="/static/components/bootstrap/dist/css/bootstrap.css" />
+        <link type="text/css" rel="stylesheet" href="/static/css/main.css" />
+        {% block extra_css %}
+        {% end %}
+    {% else %}
+        <link type="text/css" rel="stylesheet" href="/static/css/libs.min.css" />
+        <link type="text/css" rel="stylesheet" href="/static/css/build.min.css" />
+    {% end %}
+</head>
+<body>
+    {% block content %}
+    {% end %}
+    {% if debug %}
+        <script>
+            console.time('load');
+        </script>
+        <script type="application/javascript" data-main="/static/js/config.js" src="/static/components/requirejs/require.js"></script>
+        <script>
+            require(['main'], function(){
+                console.timeEnd('load');
+            });
+        </script>
+        <script src="//localhost:35729/livereload.js"></script>
+    {% else %}
+        <script>
+            console.time('load');
+        </script>
+        <script type="application/javascript" src="/static/js/build.min.js"></script>
+        <script>
+            require(['main'], function(){
+                console.timeEnd('load');
+            });
+        </script>
+    {% end %}
+</body>
+</html>
