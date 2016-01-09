@@ -1,1 +1,2 @@
+numpy
 tornado==4.3
