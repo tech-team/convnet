@@ -5,5 +5,33 @@
 {% end %}
 
 {% block content %}
-<div><i class="glyphicon glyphicon-music"></i>&nbsp;Hello, there!</div>
+<div class="container">
+    <header>
+        <h3>Header</h3>
+    </header>
+
+    <section class="main col-md-10">
+        Hi
+    </section>
+
+    <section class="sidebar col-md-2">
+        <div id="net-config">
+            <script id="config-template" type="text/handlebars">
+                <table class="table">
+                    [[#each config]]
+                        <tr>
+                            <td>[[@key]]:</td>
+                            <td><input type="text" value="[[this]]" data-key="[[@key]]"></td>
+                        </tr>
+                    [[/each]]
+                </table>
+                </script>
+        </div>
+    </section>
+
+    <footer>
+        GitHub: <a href="https://github.com/tech-team/convnet">tech-team/convnet</a><br>
+        Латкин Игорь, Леонтьев Алексей | МГТУ имени Н. Э. Баумана, 2015 г.
+    </footer> 
+</div>
 {% end %}

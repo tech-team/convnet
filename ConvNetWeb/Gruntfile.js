@@ -20,7 +20,7 @@ module.exports = function(grunt) {
     requirejs: {
       compile: {
         options: {
-          almond: true,
+          // almond: true,
           baseUrl: 'static/js',
           mainConfigFile: 'static/js/config.js',
           name: 'config',
@@ -29,7 +29,7 @@ module.exports = function(grunt) {
           generateSourceMaps: true,
           preserveLicenseComments: false,
           out: 'dist/js/build.min.js',
-          include: ['../components/almond/almond.js']
+          include: ['../components/requirejs/require.js']
         }
       }
     },

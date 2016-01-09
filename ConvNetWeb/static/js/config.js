@@ -6,7 +6,8 @@ require.config({
         bootstrap: "../components/bootstrap/dist/js/bootstrap",
         backbone: "../components/backbone/backbone",
         underscore: "../components/underscore/underscore",
-        lodash: "../components/lodash/lodash"
+        lodash: "../components/lodash/lodash",
+        handlebars: "../components/handlebars/handlebars"
     },
     shim: {
         underscore: {
@@ -35,8 +36,9 @@ require.config({
 
 define([
     'backbone',
-    'main'
+    './main'
 ], function(Backbone, main) {
     Backbone.history.start();
     window.DEBUG = true;
 });
+
