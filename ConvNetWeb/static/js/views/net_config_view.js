@@ -1,23 +1,25 @@
 
 define([
     'backbone',
-    'jquery'
-], function(Backbone, $) {
+    'jquery',
+    'handlebars'
+], function(Backbone, $, Handlebars) {
     var NetConfigView = Backbone.View.extend({
-        // cache the template
-        //tpl: _.template($('#net-config-template').html()),
+
+        el: '#net-config',
+        //template: Handlebars.compile($('#config-template').html()),
 
         events: {
             'keypress .edit': 'update',
         },
 
         initialize: function() {
-            this.$el = $('#net-config');
+
         },
 
         render: function() {
-            //this.$el.html(this.tpl(this.model.attributes));
-            //this.input = this.$('.edit');
+            this.$el.html(this.template(this.model.attributes));
+            this.input = this.$('.edit');
             return this;
         },
 

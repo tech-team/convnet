@@ -32,27 +32,19 @@
         </footer> 
     </div>
 
+    <script>
+        console.time('load');
+    </script>
     {% if debug %}
-        <script>
-            console.time('load');
-        </script>
         <script type="application/javascript" data-main="/static/js/config.js" src="/static/components/requirejs/require.js"></script>
-        <script>
-            require(['main'], function(){
-                console.timeEnd('load');
-            });
-        </script>
-        <script src="//localhost:35729/livereload.js"></script>
+        <script type="application/javascript" src="//localhost:35729/livereload.js"></script>
     {% else %}
-        <script>
-            console.time('load');
-        </script>
         <script type="application/javascript" src="/static/js/build.min.js"></script>
-        <script>
-            require(['main'], function(){
-                console.timeEnd('load');
-            });
-        </script>
     {% end %}
+    <script>
+        require(['main'], function() {
+            console.timeEnd('load');
+        });
+    </script>
 </body>
 </html>
