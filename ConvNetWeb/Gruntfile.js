@@ -112,7 +112,7 @@ module.exports = function(grunt) {
       },
       js: {
         files: ['static/js/**/*.js', '!static/js/config.js'],
-        tasks: [''],
+        tasks: [],
         options: {
           spawn: false
         }
