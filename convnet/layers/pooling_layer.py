@@ -1,6 +1,6 @@
 import numpy as np
 
-from ConvNet.layers.BaseLayer import BaseLayer, BaseLayerSettings
+from convnet.layers.base_layer import BaseLayer, BaseLayerSettings
 
 
 class PoolingLayerSettings(BaseLayerSettings):

@@ -1,6 +1,6 @@
 import numpy as np
 
-from ConvNet.layers.ConvolutionalLayer import ConvolutionalLayerSettings, ConvolutionalLayer
+from convnet.layers.convolutional_layer import ConvolutionalLayerSettings, ConvolutionalLayer
 
 
 class FullConnectedLayerSettings(ConvolutionalLayerSettings):

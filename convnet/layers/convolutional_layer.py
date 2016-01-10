@@ -1,7 +1,7 @@
 import numpy as np
 
-from ConvNet.layers.BaseLayer import BaseLayer, BaseLayerSettings
 import utils
+from convnet.layers.base_layer import BaseLayer, BaseLayerSettings
 
 
 class ConvolutionalLayerSettings(BaseLayerSettings):
