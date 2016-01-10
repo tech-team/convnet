@@ -4,7 +4,7 @@ import logging
 import tornado
 import tornado.web
 
-from ConvNetWeb import settings
+from convnet_web import settings
 
 
 class BaseHandler(tornado.web.RequestHandler):

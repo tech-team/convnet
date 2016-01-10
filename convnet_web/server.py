@@ -4,7 +4,7 @@ import tornado.ioloop
 import tornado.web
 import tornado.options
 
-import ConvNetWeb.handlers
+import convnet_web.handlers
 import settings
 
 
@@ -17,7 +17,7 @@ def make_app():
     }
 
     return tornado.web.Application([
-        (r"/", ConvNetWeb.handlers.MainHandler),
+        (r"/", convnet_web.handlers.MainHandler),
     ], **s)
 
 if __name__ == "__main__":

@@ -58,6 +58,6 @@ target/
 
 # Custom
 .idea/
-ConvNetWeb/node_modules/
-ConvNetWeb/static/components/
-ConvNetWeb/dist
+convnet_web/node_modules/
+convnet_web/static/components/
+convnet_web/dist
