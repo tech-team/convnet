@@ -2,7 +2,9 @@ import numpy as np
 
 
 def im2col(matrix3d, window_size, stride, width, height):
-    x_col = np.empty((window_size ** 2 * matrix3d.shape[2], width * height))
+    w = window_size * window_size * matrix3d.shape[2]
+    h = width * height
+    x_col = np.empty((w, h))
 
     i = 0
     for y in xrange(0, height):

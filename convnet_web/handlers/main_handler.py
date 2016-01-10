@@ -1,4 +1,4 @@
-from convnet_web.handlers.BaseHandler import BaseHandler
+from convnet_web.handlers.base_handler import BaseHandler
 
 
 class MainHandler(BaseHandler):
