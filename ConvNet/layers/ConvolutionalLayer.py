@@ -57,7 +57,7 @@ class ConvolutionalLayer(BaseLayer):
             for x in xrange(0, self.settings.out_width):
                 x_offset = x * self.settings.stride
                 region = padded_data[x_offset:x_offset + f, y_offset:y_offset + f, :]
-                X[:, i] = np.vstack([region[:, :, z].reshape(f * f) for z in xrange(0, region.shape[2])]).reshape(-1)
+                X[:, i] = np.vstack([region[:, :, z].reshape(-1) for z in xrange(0, region.shape[2])]).reshape(-1)
                 i += 1
 
         res = np.dot(self.w, X) + self.b
@@ -136,3 +136,15 @@ if __name__ == "__main__":
     res = l.forward(arr)
     print(res[:, :, 0])
     print(res[:, :, 1])
+
+    assert (res == np.array([[[1., 2.],
+                             [2., -6.],
+                             [-1., -3.]],
+
+                            [[2., 1.],
+                             [3., 1.],
+                             [1., -3.]],
+
+                            [[4., -1.],
+                             [3., 1.],
+                             [3., 0.]]])).all()
