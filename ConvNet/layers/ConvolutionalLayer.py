@@ -3,6 +3,34 @@ import numpy as np
 from ConvNet.layers.BaseLayer import BaseLayer, BaseLayerSettings
 
 
+def blockshaped(arr, nrows, ncols):
+    """
+    Return an array of shape (n, nrows, ncols) where
+    n * nrows * ncols = arr.size
+
+    If arr is a 2D array, the returned array looks like n subblocks with
+    each subblock preserving the "physical" layout of arr.
+    """
+    h, w = arr.shape
+    return (arr.reshape(h//nrows, nrows, -1, ncols)
+               .swapaxes(1,2)
+               .reshape(-1, nrows, ncols))
+
+
+def unblockshaped(arr, h, w):
+    """
+    Return an array of shape (h, w) where
+    h * w = arr.size
+
+    If arr is of shape (n, nrows, ncols), n sublocks of shape (nrows, ncols),
+    then the returned array preserves the "physical" layout of the sublocks.
+    """
+    n, nrows, ncols = arr.shape
+    return (arr.reshape(h//nrows, -1, nrows, ncols)
+               .swapaxes(1,2)
+               .reshape(h, w))
+
+
 class ConvolutionalLayerSettings(BaseLayerSettings):
     def __init__(self, **kwargs):
         super(ConvolutionalLayerSettings, self).__init__(**kwargs)
@@ -64,12 +92,13 @@ class ConvolutionalLayer(BaseLayer):
             y_offset = y * self.settings.stride
             for x in xrange(0, self.settings.out_width):
                 x_offset = x * self.settings.stride
-                X[:, i] = padded_data[x_offset:x_offset + f, y_offset:y_offset + f, :].reshape(X.shape[0])
+                region = padded_data[x_offset:x_offset + f, y_offset:y_offset + f, :]
+                X[:, i] = np.vstack(tuple([region[:,:,z].reshape(f*f) for z in xrange(0, region.shape[2])])).reshape(-1)
                 i += 1
 
         res = np.dot(self.w, X) + self.b
         # for i in xrange(0, res.shape[0]):
         #     res[i] = np.full((res.shape[1],), i)
         res = res.swapaxes(0, 1).reshape(
-                (self.settings.out_width, self.settings.out_height, self.settings.filters_count))
+                (self.settings.out_width, self.settings.out_height, self.settings.out_depth)).swapaxes(0, 1)
         return res
