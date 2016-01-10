@@ -43,15 +43,7 @@ class ConvolutionalLayer(BaseLayer):
 
         if self.settings.zero_padding != 0:
             p = self.settings.zero_padding
-            padded_data = np.empty((
-                data.shape[0] + p + p,
-                data.shape[1] + p + p,
-                data.shape[2]
-            ))
-
-            for z in xrange(0, data.shape[2]):
-                padded_data[:, :, z] = np.lib.pad(data[:, :, z], (1, 1), 'constant', constant_values=(0, 0))
-
+            padded_data = np.pad(data, pad_width=((p, p), (p, p), (0, 0)), mode='constant', constant_values=0)
         else:
             padded_data = data
 
@@ -77,6 +69,7 @@ class ConvolutionalLayer(BaseLayer):
 
 
 if __name__ == "__main__":
+    np.set_printoptions(precision=4, linewidth=120)
     # arr = np.random.rand(227, 227, 3)
     # s = ConvolutionalLayerSettings(in_dimensions=arr.shape, filter_size=11, stride=4, filters_count=96, zero_padding=0)
     # l = ConvolutionalLayer(s)

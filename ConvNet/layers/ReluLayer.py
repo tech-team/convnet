@@ -45,6 +45,7 @@ class ReluLayer(BaseLayer):
 
 
 if __name__ == "__main__":
+    np.set_printoptions(precision=4, linewidth=120)
     arr = np.random.uniform(-5, 5, 48).reshape((4, 4, 3))
     s = ReluLayerSettings(in_dimensions=arr.shape, activation='max')
     l = ReluLayer(s)
