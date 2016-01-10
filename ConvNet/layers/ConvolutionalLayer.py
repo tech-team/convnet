@@ -13,6 +13,14 @@ class ConvolutionalLayerSettings(BaseLayerSettings):
         self.stride = kwargs['stride']  # S
         self.zero_padding = kwargs['zero_padding']  # P
 
+        out_width = (self.in_width - self.filter_size + 2.0 * self.zero_padding) / self.stride + 1
+        assert out_width % 1 == 0, \
+            "out_width == {}, but should be integer".format(out_width)
+
+        out_height = (self.in_height - self.filter_size + 2.0 * self.zero_padding) / self.stride + 1
+        assert out_height % 1 == 0, \
+            "out_width == {}, but should be integer".format(out_height)
+
     @property
     def out_width(self):
         return int((self.in_width - self.filter_size + 2.0 * self.zero_padding) / self.stride + 1)
