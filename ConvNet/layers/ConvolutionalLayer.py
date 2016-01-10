@@ -41,6 +41,20 @@ class ConvolutionalLayer(BaseLayer):
         assert data.shape == self.settings.in_dimensions, \
             "data.shape = {}; settings.in_dimensions = {}".format(data.shape, self.settings.in_dimensions)
 
+        if self.settings.zero_padding != 0:
+            p = self.settings.zero_padding
+            padded_data = np.empty((
+                data.shape[0] + p + p,
+                data.shape[1] + p + p,
+                data.shape[2]
+            ))
+
+            for z in xrange(0, data.shape[2]):
+                padded_data[:, :, z] = np.lib.pad(data[:, :, z], (1, 1), 'constant', constant_values=(0, 0))
+
+        else:
+            padded_data = data
+
         x_columns = self.settings.out_width * self.settings.out_height
         X = np.empty((self.w.shape[1], x_columns))
 
@@ -50,7 +64,7 @@ class ConvolutionalLayer(BaseLayer):
             y_offset = y * self.settings.stride
             for x in xrange(0, self.settings.out_width):
                 x_offset = x * self.settings.stride
-                X[:, i] = data[x_offset:x_offset + f, y_offset:y_offset + f, :].reshape(X.shape[0])
+                X[:, i] = padded_data[x_offset:x_offset + f, y_offset:y_offset + f, :].reshape(X.shape[0])
                 i += 1
 
         res = np.dot(self.w, X) + self.b
