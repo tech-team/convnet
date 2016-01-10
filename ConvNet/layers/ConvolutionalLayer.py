@@ -1,6 +1,7 @@
 import numpy as np
 
 from ConvNet.layers.BaseLayer import BaseLayer, BaseLayerSettings
+import utils
 
 
 class ConvolutionalLayerSettings(BaseLayerSettings):
@@ -41,31 +42,21 @@ class ConvolutionalLayer(BaseLayer):
         assert data.shape == self.settings.in_dimensions, \
             "data.shape = {}; settings.in_dimensions = {}".format(data.shape, self.settings.in_dimensions)
 
+        # zero padding
         if self.settings.zero_padding != 0:
             p = self.settings.zero_padding
             padded_data = np.pad(data, pad_width=((p, p), (p, p), (0, 0)), mode='constant', constant_values=0)
         else:
             padded_data = data
 
-        x_columns = self.settings.out_width * self.settings.out_height
-        X = np.empty((self.w.shape[1], x_columns))
+        # convert input matrix to array of flattened receptive fields
+        x_col = utils.im2col(padded_data, self.settings.filter_size, self.settings.stride,
+                             self.settings.out_width, self.settings.out_height)
 
-        i = 0
-        f = self.settings.filter_size
-        for y in xrange(0, self.settings.out_height):
-            y_offset = y * self.settings.stride
-            for x in xrange(0, self.settings.out_width):
-                x_offset = x * self.settings.stride
-                region = padded_data[x_offset:x_offset + f, y_offset:y_offset + f, :]
-                X[:, i] = np.vstack([region[:, :, z].reshape(-1) for z in xrange(0, region.shape[2])]).reshape(-1)
-                i += 1
+        # activation itself
+        res = np.dot(self.w, x_col) + self.b
 
-        res = np.dot(self.w, X) + self.b
-        # for i in xrange(0, res.shape[0]):
-        #     res[i] = np.full((res.shape[1],), i)
-        res = res.swapaxes(0, 1).reshape(
-                (self.settings.out_width, self.settings.out_height, self.settings.out_depth)).swapaxes(0, 1)
-        return res
+        return utils.col2im(res, self.settings.out_width, self.settings.out_height, self.settings.out_depth)
 
 
 if __name__ == "__main__":
