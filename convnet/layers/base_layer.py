@@ -56,12 +56,34 @@ class BaseLayer(object):
         super(BaseLayer, self).__init__()
 
         self.settings = settings
+        self.prev_layer = None
+        self.next_layer = None
+
+    def setup_layers(self, prev_layer, next_layer=None):
+        """
+        :type prev_layer: BaseLayer
+        :type next_layer: BaseLayer
+        """
+        self.prev_layer = prev_layer
+        self.next_layer = next_layer
+
+    @property
+    def is_output(self):
+        return self.next_layer is None
 
     @abc.abstractmethod
     def forward(self, data):
         """
         :param data: data from previous layer
         :type data: np.ndarray
+        """
+        pass
+
+    @abc.abstractmethod
+    def backward(self, error):
+        """
+        :param error: This layer's error
+        :type error: np.ndarray
         """
         pass
 

@@ -50,3 +50,6 @@ class PoolingLayer(BaseLayer):
                 j += 1
 
         return res
+
+    def backward(self, error):
+        pass

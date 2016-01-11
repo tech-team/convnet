@@ -40,5 +40,8 @@ class ReluLayer(BaseLayer):
     def forward(self, data):
         return self.activation(data)
 
+    def backward(self, error):
+        pass
+
     def activation(self, x):
         return self.ACTIVATIONS[self.settings.activation](x)

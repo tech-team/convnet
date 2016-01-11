@@ -65,3 +65,6 @@ class ConvolutionalLayer(BaseLayer):
         res = np.dot(self.w, x_col) + self.b
 
         return utils.col2im(res, self.settings.out_width, self.settings.out_height, self.settings.out_depth)
+
+    def backward(self, error):
+        pass
