@@ -28,6 +28,10 @@ class BaseLayerSettings(object):
         return self._in_shape[2]
 
     @property
+    def out_shape(self):
+        return self.out_width, self.out_height, self.out_depth
+
+    @property
     @abc.abstractmethod
     def out_width(self):
         pass

@@ -32,11 +32,7 @@ class PoolingLayer(BaseLayer):
         super(PoolingLayer, self).__init__(settings)
 
     def forward(self, data):
-        res = np.empty((
-            self.settings.out_width,
-            self.settings.out_height,
-            self.settings.out_depth,
-        ))
+        res = np.empty(self.settings.out_shape)
 
         f = self.settings.filter_size
         for z in xrange(0, self.settings.out_depth):
