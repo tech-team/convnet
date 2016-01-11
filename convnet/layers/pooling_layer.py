@@ -4,11 +4,11 @@ from convnet.layers.base_layer import BaseLayer, BaseLayerSettings
 
 
 class PoolingLayerSettings(BaseLayerSettings):
-    def __init__(self, **kwargs):
-        super(PoolingLayerSettings, self).__init__(**kwargs)
+    def __init__(self, in_shape, filter_size, stride=1):
+        super(PoolingLayerSettings, self).__init__(in_shape=in_shape)
 
-        self.filter_size = kwargs['filter_size']  # F
-        self.stride = kwargs['stride']  # S
+        self.filter_size = filter_size  # F
+        self.stride = stride  # S
 
     @property
     def out_width(self):

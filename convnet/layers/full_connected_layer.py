@@ -4,13 +4,12 @@ from convnet.layers.convolutional_layer import ConvolutionalLayerSettings, Convo
 
 
 class FullConnectedLayerSettings(ConvolutionalLayerSettings):
-    def __init__(self, **kwargs):
-        kwargs['filters_count'] = 1
-        kwargs['filter_size'] = kwargs['in_dimensions'][0]
-        kwargs['stride'] = 1
-        kwargs['zero_padding'] = 0
-
-        super(FullConnectedLayerSettings, self).__init__(**kwargs)
+    def __init__(self, in_shape, neurons_count=1):
+        super(FullConnectedLayerSettings, self).__init__(in_shape=in_shape,
+                                                         filters_count=neurons_count,
+                                                         filter_size=in_shape[0],
+                                                         stride=1,
+                                                         zero_padding=0)
 
 
 class FullConnectedLayer(ConvolutionalLayer):

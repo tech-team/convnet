@@ -7,9 +7,9 @@ class ReluLayerSettings(BaseLayerSettings):
     """
     activation - string, containing a name of desired activation func (refer to ReluLayer.ACTIVATIONS
     """
-    def __init__(self, **kwargs):
-        super(ReluLayerSettings, self).__init__(**kwargs)
-        self.activation = kwargs['activation']
+    def __init__(self, in_shape, activation='max'):
+        super(ReluLayerSettings, self).__init__(in_shape=in_shape)
+        self.activation = activation
 
     @property
     def out_width(self):

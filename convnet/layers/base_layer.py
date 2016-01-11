@@ -4,36 +4,28 @@ import numpy as np
 
 
 class BaseLayerSettings(object):
-    def __init__(self, **kwargs):
+    def __init__(self, in_shape):
         super(BaseLayerSettings, self).__init__()
 
-        if 'in_dimensions' not in kwargs:
-            raise AttributeError("in_dimensions is required")
-
-        self._in_dimensions = tuple()
-        self.in_dimensions = kwargs['in_dimensions']  # W1 x H1 x D1
+        assert len(in_shape) == 3, "Only 3-dimensional layers are allowed"
+        assert in_shape[0] == in_shape[1], "input's width and height have to be the same"
+        self._in_shape = in_shape
 
     @property
-    def in_dimensions(self):
-        return self._in_dimensions
-
-    @in_dimensions.setter
-    def in_dimensions(self, in_dimensions):
-        assert len(in_dimensions) == 3, "Only 3-dimensional layers are allowed"
-        assert in_dimensions[0] == in_dimensions[1], "input's width and height have to be the same"
-        self._in_dimensions = in_dimensions
+    def in_shape(self):
+        return self._in_shape
 
     @property
     def in_width(self):
-        return self.in_dimensions[0]
+        return self._in_shape[0]
 
     @property
     def in_height(self):
-        return self.in_dimensions[1]
+        return self._in_shape[1]
 
     @property
     def in_depth(self):
-        return self.in_dimensions[2]
+        return self._in_shape[2]
 
     @property
     @abc.abstractmethod

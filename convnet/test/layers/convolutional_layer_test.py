@@ -38,7 +38,7 @@ class ConvolutionalLayerTest(unittest.TestCase):
             [1, 0, 0, 1, 2],
             [0, 1, 1, 1, 2],
         ])
-        s = ConvolutionalLayerSettings(in_dimensions=arr.shape, filter_size=3, stride=2, filters_count=2, zero_padding=1)
+        s = ConvolutionalLayerSettings(in_shape=arr.shape, filter_size=3, stride=2, filters_count=2, zero_padding=1)
         l = ConvolutionalLayer(s)
 
         l.w = np.array([
