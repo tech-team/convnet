@@ -103,7 +103,6 @@ class ConvolutionalLayer(BaseLayer):
         # calc delta
         if self.is_output:
             delta = self.prev_out - next_layer_delta
-            next_layer_delta = delta
         else:
             delta = np.empty(self.settings.out_shape)
             for z in xrange(delta.shape[2]):
