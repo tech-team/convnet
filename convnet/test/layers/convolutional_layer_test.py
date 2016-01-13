@@ -100,23 +100,17 @@ class ConvolutionalLayerTest(unittest.TestCase):
              [3., 0.]]]))
 
     def test_backward(self):
-        arr1 = np.empty((5, 5, 1))
+        arr1 = np.empty((3, 3, 1))
         arr1[:, :, 0] = np.array([
-            [1, 0, 0, 0, 0],
-            [0, 1, 0, 0, 0],
-            [0, 0, 1, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0]
-        ])
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1]])
 
-        arr2 = np.empty((5, 5, 1))
+        arr2 = np.empty((3, 3, 1))
         arr2[:, :, 0] = np.array([
-            [0, 0, 1, 0, 0],
-            [0, 1, 0, 0, 0],
-            [1, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0]
-        ])
+            [0, 0, 1],
+            [0, 1, 0],
+            [1, 0, 0]])
 
         samples = [arr1, arr2]
 
@@ -136,7 +130,7 @@ class ConvolutionalLayerTest(unittest.TestCase):
                 filter_size=3,
                 stride=1,
                 filters_count=2,
-                zero_padding=1)
+                zero_padding=0)
         conv_layer = ConvolutionalLayer(s)
         conv_layer.prev_layer = input_layer
 
