@@ -141,7 +141,7 @@ class ConvolutionalLayerTest(unittest.TestCase):
             res = l.forward(samples[i])
             res_before.append(res)
 
-            l.backward(res - expected_res[i])
+            l.backward(expected_res[i])
 
         dist_before = get_dist(res_before, expected_res)
         l.update_weights()

@@ -44,10 +44,10 @@ class ConvolutionalLayer(BaseLayer):
 
         f = settings.filter_size
         self.w = [np.zeros((f, f, settings.in_depth)) for _ in xrange(settings.filters_count)]
-        self.delta_w = [np.zeros((f, f, settings.in_depth)) for _ in xrange(settings.filters_count)]
+        self.dw = [np.zeros((f, f, settings.in_depth)) for _ in xrange(settings.filters_count)]
 
         self.b = [0] * settings.filters_count
-        self.delta_b = [0] * settings.filters_count
+        self.db = [0] * settings.filters_count
 
     def _forward(self, data):
         assert data.shape == self.settings.in_shape, \
@@ -100,21 +100,6 @@ class ConvolutionalLayer(BaseLayer):
         return res
 
     def backward(self, next_layer_delta):
-        delta = np.empty(self.settings.out_shape)  # what size?
-
-        # TODO: calc delta for self.is_output() == True
-
-        # calc delta
-        for z in xrange(delta.shape[2]):
-            for y in xrange(delta.shape[1]):
-                for x in xrange(delta.shape[0]):
-                    conv = 0.0
-                    for i in xrange(0, next_layer_delta.shape[0]):
-                        for j in xrange(0, next_layer_delta.shape[1]):
-                            for f in xrange(0, next_layer_delta.shape[2]):
-                                conv += next_layer_delta[i, j, f] * self.next_layer.w[f][x - i, y - j, z]
-                    delta[x, y, z] += conv
-
         # calc dE/dW
         for f in xrange(len(self.w)):
             for z in xrange(self.w[f].shape[2]):
@@ -126,7 +111,7 @@ class ConvolutionalLayer(BaseLayer):
                             for j in xrange(next_layer_delta.shape[1]):
                                 conv += next_layer_delta[i, j, f] * self.prev_layer.prev_out[i + x, j + y, z]
 
-                        self.delta_w[f][x, y, z] += conv
+                        self.dw[f][x, y, z] += conv
 
         # calc dE/dB
         for f in xrange(len(self.b)):
@@ -135,15 +120,37 @@ class ConvolutionalLayer(BaseLayer):
                 for j in xrange(next_layer_delta.shape[1]):
                     conv += next_layer_delta[i, j, f]
 
-            self.delta_b[f] += conv
+            self.db[f] += conv
 
-        return delta
+        # calc delta
+        if self.is_output:
+            delta = next_layer_delta - self.prev_out
+            return delta
+        else:
+            delta = np.empty(self.settings.out_shape)
+            for z in xrange(delta.shape[2]):
+                for y in xrange(delta.shape[1]):
+                    for x in xrange(delta.shape[0]):
+                        conv = 0.0
+                        for i in xrange(0, next_layer_delta.shape[0]):
+                            for j in xrange(0, next_layer_delta.shape[1]):
+                                for f in xrange(0, next_layer_delta.shape[2]):
+                                    conv += next_layer_delta[i, j, f] * self.next_layer.w[f][x - i, y - j, z]
+                        delta[x, y, z] += conv
 
-    def update_weights(self):
+            return delta
+
+    def update_weights(self, samples_count=None):
         for f in xrange(len(self.w)):
-            self.w[f] += self.delta_w[f]
-            self.delta_w[f] = np.zeros(self.delta_w[f].shape)
+            if samples_count:
+                self.dw[f] /= samples_count
+
+            self.w[f] -= self.dw[f]
+            self.dw[f] = np.zeros(self.dw[f].shape)
 
         for f in xrange(len(self.b)):
-            self.w[f] += self.delta_b[f]
-            self.delta_b[f] = 0
+            if samples_count:
+                self.db[f] /= samples_count
+
+            self.b[f] -= self.db[f]
+            self.db[f] = 0
