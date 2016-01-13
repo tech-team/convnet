@@ -123,18 +123,18 @@ class ConvolutionalLayer(BaseLayer):
                     for x in xrange(self.w[f].shape[0]):
 
                         conv = 0.0
-                        for i in xrange(next_layer_delta.shape[0]):
-                            for j in xrange(next_layer_delta.shape[1]):
-                                conv += next_layer_delta[i, j, f] * self.prev_layer.prev_out[i + x, j + y, z]
+                        for i in xrange(delta.shape[0]):
+                            for j in xrange(delta.shape[1]):
+                                conv += delta[i, j, f] * self.prev_layer.prev_out[i + x, j + y, z]
 
                         self.dw[f][x, y, z] += conv
 
         # calc dE/dB
         for f in xrange(len(self.b)):
             conv = 0.0
-            for i in xrange(next_layer_delta.shape[0]):
-                for j in xrange(next_layer_delta.shape[1]):
-                    conv += next_layer_delta[i, j, f]
+            for i in xrange(delta.shape[0]):
+                for j in xrange(delta.shape[1]):
+                    conv += delta[i, j, f]
 
             self.db[f] += conv
 
