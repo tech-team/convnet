@@ -41,36 +41,45 @@ class ConvolutionalLayerTest(unittest.TestCase):
         s = ConvolutionalLayerSettings(in_shape=arr.shape, filter_size=3, stride=2, filters_count=2, zero_padding=1)
         l = ConvolutionalLayer(s)
 
-        l.w = np.array([
-            [0, 1, -1,
-             -1, 0, 1,
-             -1, 1, 0,
-
-             -1, 0, -1,
-             1, 0, 1,
-             -1, 0, 1,
-
-             0, 0, 1,
-             0, -1, -1,
-             1, -1, 0],
-
-            [1, 0, 0,
-             -1, -1, 1,
-             -1, 1, 0,
-
-             1, 0, 0,
-             1, 0, -1,
-             -1, -1, -1,
-
-             -1, 0, 1,
-             0, 0, 1,
-             0, -1, -1]
+        w0 = np.empty((3, 3, 3))
+        w0[:, :, 0] = np.array([
+            [0, 1, -1],
+            [-1, 0, 1],
+            [-1, 1, 0]
+        ])
+        w0[:, :, 1] = np.array([
+            [-1, 0, -1],
+            [1, 0, 1],
+            [-1, 0, 1]
+        ])
+        w0[:, :, 2] = np.array([
+            [0, 0, 1],
+            [0, -1, -1],
+            [1, -1, 0]
         ])
 
-        l.b = np.array([
+        w1 = np.empty((3, 3, 3))
+        w1[:, :, 0] = np.array([
+            [1, 0, 0],
+            [-1, -1, 1],
+            [-1, 1, 0]
+        ])
+        w1[:, :, 1] = np.array([
+            [1, 0, 0],
+            [1, 0, -1],
+            [-1, -1, -1]
+        ])
+        w1[:, :, 2] = np.array([
+            [-1, 0, 1],
+            [0, 0, 1],
+            [0, -1, -1]
+        ])
+
+        l.w = [w0, w1]
+        l.b = [
             1,
             0
-        ]).reshape(2, 1)
+        ]
 
         res = l.forward(arr)
         print(res[:, :, 0])

@@ -43,10 +43,10 @@ class ConvolutionalLayer(BaseLayer):
         super(ConvolutionalLayer, self).__init__(settings)
 
         f = settings.filter_size
-        self.w = np.zeros((settings.filters_count, f * f * settings.in_depth))
-        self.b = np.zeros((settings.filters_count, 1))
+        self.w = [np.zeros((f, f, settings.in_depth)) for _ in xrange(settings.filters_count)]
+        self.b = [0] * settings.filters_count
 
-    def forward(self, data):
+    def _forward(self, data):
         assert data.shape == self.settings.in_shape, \
             "data.shape = {}; settings.in_dimensions = {}".format(data.shape, self.settings.in_shape)
 
@@ -65,6 +65,35 @@ class ConvolutionalLayer(BaseLayer):
         res = np.dot(self.w, x_col) + self.b
 
         return utils.col2im(res, self.settings.out_width, self.settings.out_height, self.settings.out_depth)
+
+    def forward(self, data):
+        assert data.shape == self.settings.in_shape, \
+            "data.shape = {}; settings.in_dimensions = {}".format(data.shape, self.settings.in_shape)
+
+        # zero padding
+        if self.settings.zero_padding:
+            p = self.settings.zero_padding
+            padded_data = np.pad(data, pad_width=((p, p), (p, p), (0, 0)), mode='constant', constant_values=0)
+        else:
+            padded_data = data
+
+        s = self.settings.stride
+
+        res = np.empty(self.settings.out_shape)
+
+        for f in xrange(res.shape[2]):
+            for y in xrange(res.shape[1]):
+                for x in xrange(res.shape[0]):
+
+                    conv = 0.0
+                    for i in xrange(0, self.settings.filter_size):
+                        for j in xrange(0, self.settings.filter_size):
+                            for z in xrange(0, self.settings.in_depth):
+                                conv += padded_data[s * x + i, s * y + j, z] * self.w[f][i, j, z]
+
+                    res[x, y, f] = self.b[f] + conv
+
+        return res
 
     def backward(self, error):
         pass
