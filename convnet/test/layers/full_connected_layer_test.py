@@ -20,11 +20,18 @@ class FullConnectedLayerTest(unittest.TestCase):
             [1, 0]
         ])
 
-        w = np.array([
-            [0, 1, 0, 1, 1, 0, 1, 0]
+        w = [np.zeros((2, 2, 2))]
+        w[0][:, :, 0] = np.array([
+            [0, 1],
+            [0, 1]
         ])
 
-        b = np.array([0])
+        w[0][:, :, 1] = np.array([
+            [1, 0],
+            [1, 0]
+        ])
+
+        b = [0]
 
         expected_res = [[[4]]]
 
