@@ -97,7 +97,7 @@ class ConvolutionalLayer(BaseLayer):
         return res
 
     def backward(self, next_layer_error):
-        delta = np.empty()  # what size?
+        delta = np.empty(self.settings.out_shape)  # what size?
 
         for f in xrange(delta.shape[2]):
             for y in xrange(delta.shape[1]):
@@ -106,7 +106,7 @@ class ConvolutionalLayer(BaseLayer):
                     for i in xrange(0, next_layer_error.shape[0]):
                         for j in xrange(0, next_layer_error.shape[1]):
                             for z in xrange(0, next_layer_error.shape[2]):
-                                conv += next_layer_error[i, j, z] * self.w[z][x - i, y - j, f]
+                                conv += next_layer_error[i, j, z] * self.next_layer.w[z][x - i, y - j, f]
                     delta[x, y, f] = conv
 
         # self.prev_layer.prev_out - holds last output of previous_layer
