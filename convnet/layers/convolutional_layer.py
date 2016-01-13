@@ -138,3 +138,12 @@ class ConvolutionalLayer(BaseLayer):
             self.delta_b[f] += conv
 
         return delta
+
+    def update_weights(self):
+        for f in xrange(len(self.w)):
+            self.w[f] += self.delta_w[f]
+            self.delta_w[f] = np.zeros(self.delta_w[f].shape)
+
+        for f in xrange(len(self.b)):
+            self.w[f] += self.delta_b[f]
+            self.delta_b[f] = 0

@@ -119,15 +119,46 @@ class ConvolutionalLayerTest(unittest.TestCase):
 
         samples = [arr1, arr2]
 
+        expected_res1 = np.empty((1, 1, 2))
+        expected_res1[0, 0, 0] = 1
+        expected_res1[0, 0, 1] = -1
+        expected_res2 = np.empty((1, 1, 2))
+        expected_res2[0, 0, 0] = -1
+        expected_res2[0, 0, 1] = 1
+
+        expected_res = [expected_res1, expected_res2]
+
         s = ConvolutionalLayerSettings(
-                in_shape=arr.shape,
-                filter_size=1,
+                in_shape=arr1.shape,
+                filter_size=3,
                 stride=1,
-                filters_count=1,
+                filters_count=2,
                 zero_padding=1)
         l = ConvolutionalLayer(s)
 
-        for sample in samples:
-            res = l.forward(sample)
+        res_before = []
+        for i in xrange(len(samples)):
+            res = l.forward(samples[i])
+            res_before.append(res)
+
+            l.backward(res - expected_res[i])
+
+        dist_before = get_dist(res_before, expected_res)
+        l.update_weights()
+
+        dist_after = get_dist(res_after, expected_res)
+
+        print dist_before
+        print dist_after
+
+        self.assertLess(dist_after, dist_before)
 
 
+
+
+
+def get_dist(res, expected_res):
+    dist = 0
+    for i in xrange(len(res)):
+        dist += np.linalg.norm(res[i] - expected_res[i])
+    return dist / len(res)
