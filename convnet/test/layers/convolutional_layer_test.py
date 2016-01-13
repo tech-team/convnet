@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from convnet.layers.convolutional_layer import ConvolutionalLayerSettings, ConvolutionalLayer
+from convnet.layers.input_layer import InputLayer, InputLayerSettings
 
 
 class ConvolutionalLayerTest(unittest.TestCase):
@@ -128,33 +129,43 @@ class ConvolutionalLayerTest(unittest.TestCase):
 
         expected_res = [expected_res1, expected_res2]
 
+        input_layer = InputLayer(InputLayerSettings(arr1.shape))
+
         s = ConvolutionalLayerSettings(
                 in_shape=arr1.shape,
                 filter_size=3,
                 stride=1,
                 filters_count=2,
                 zero_padding=1)
-        l = ConvolutionalLayer(s)
+        conv_layer = ConvolutionalLayer(s)
+        conv_layer.prev_layer = input_layer
 
+        # before update
         res_before = []
         for i in xrange(len(samples)):
-            res = l.forward(samples[i])
+            res = input_layer.forward(samples[i])
+            res = conv_layer.forward(res)
             res_before.append(res)
 
-            l.backward(expected_res[i])
+            conv_layer.backward(expected_res[i])
 
+        # update weights
         dist_before = get_dist(res_before, expected_res)
-        l.update_weights()
+        conv_layer.update_weights()
+
+        # after update
+        res_after = []
+        for i in xrange(len(samples)):
+            res = input_layer.forward(samples[i])
+            res = conv_layer.forward(res)
+            res_after.append(res)
 
         dist_after = get_dist(res_after, expected_res)
 
-        print dist_before
-        print dist_after
+        print 'Before: %s' % dist_before
+        print 'After: %s' % dist_after
 
         self.assertLess(dist_after, dist_before)
-
-
-
 
 
 def get_dist(res, expected_res):

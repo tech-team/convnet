@@ -88,7 +88,6 @@ class BaseLayer(object):
         """
         pass
 
-    @abc.abstractmethod
     def update_weights(self, samples_count=None):
         """
         :param samples_count: Samples count or None to apply an entire gradient without averaging
