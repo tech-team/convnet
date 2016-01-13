@@ -51,5 +51,5 @@ class PoolingLayer(BaseLayer):
 
         return res
 
-    def backward(self, error):
+    def backward(self, next_layer_error):
         pass

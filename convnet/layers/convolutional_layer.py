@@ -93,7 +93,20 @@ class ConvolutionalLayer(BaseLayer):
 
                     res[x, y, f] = self.b[f] + conv
 
+        self.prev_out = res
         return res
 
-    def backward(self, error):
-        pass
+    def backward(self, next_layer_error):
+        delta = np.empty()  # what size?
+
+        for f in xrange(delta.shape[2]):
+            for y in xrange(delta.shape[1]):
+                for x in xrange(delta.shape[0]):
+                    conv = 0.0
+                    for i in xrange(0, next_layer_error.shape[0]):
+                        for j in xrange(0, next_layer_error.shape[1]):
+                            for z in xrange(0, next_layer_error.shape[2]):
+                                conv += next_layer_error[i, j, z] * self.w[z][x - i, y - j, f]
+                    delta[x, y, f] = conv
+
+        # self.prev_layer.prev_out - holds last output of previous_layer

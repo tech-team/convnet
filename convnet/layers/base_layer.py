@@ -58,6 +58,7 @@ class BaseLayer(object):
         self.settings = settings
         self.prev_layer = None
         self.next_layer = None
+        self.prev_out = None
 
     def setup_layers(self, prev_layer, next_layer=None):
         """
@@ -80,10 +81,10 @@ class BaseLayer(object):
         pass
 
     @abc.abstractmethod
-    def backward(self, error):
+    def backward(self, next_layer_error):
         """
-        :param error: This layer's error
-        :type error: np.ndarray
+        :param next_layer_error: This layer's error
+        :type next_layer_error: np.ndarray
         """
         pass
 
