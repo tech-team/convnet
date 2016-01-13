@@ -145,7 +145,7 @@ class ConvolutionalLayerTest(unittest.TestCase):
 
         # update weights
         dist_before = get_dist(res_before, expected_res)
-        conv_layer.update_weights()
+        conv_layer.update_weights(len(samples))
 
         # after update
         res_after = []
