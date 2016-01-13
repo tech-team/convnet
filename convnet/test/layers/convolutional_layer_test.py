@@ -97,3 +97,7 @@ class ConvolutionalLayerTest(unittest.TestCase):
             [[4., -1.],
              [3., 1.],
              [3., 0.]]]))
+
+    def test_backward(self):
+        # TODO: test
+        assert False

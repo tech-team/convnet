@@ -81,10 +81,10 @@ class BaseLayer(object):
         pass
 
     @abc.abstractmethod
-    def backward(self, next_layer_error):
+    def backward(self, next_layer_delta):
         """
-        :param next_layer_error: This layer's error
-        :type next_layer_error: np.ndarray
+        :param next_layer_delta: Next layer's delta
+        :type next_layer_delta: np.ndarray
         """
         pass
 

@@ -44,6 +44,7 @@ class ConvolutionalLayer(BaseLayer):
 
         f = settings.filter_size
         self.w = [np.zeros((f, f, settings.in_depth)) for _ in xrange(settings.filters_count)]
+        self.delta_e = [np.zeros((f, f, settings.in_depth)) for _ in xrange(settings.filters_count)]
         self.b = [0] * settings.filters_count
 
     def _forward(self, data):
@@ -96,17 +97,33 @@ class ConvolutionalLayer(BaseLayer):
         self.prev_out = res
         return res
 
-    def backward(self, next_layer_error):
+    def backward(self, next_layer_delta):
         delta = np.empty(self.settings.out_shape)  # what size?
 
-        for f in xrange(delta.shape[2]):
+        # TODO: calc delta for self.is_output() == True
+
+        # calc delta
+        for z in xrange(delta.shape[2]):
             for y in xrange(delta.shape[1]):
                 for x in xrange(delta.shape[0]):
                     conv = 0.0
-                    for i in xrange(0, next_layer_error.shape[0]):
-                        for j in xrange(0, next_layer_error.shape[1]):
-                            for z in xrange(0, next_layer_error.shape[2]):
-                                conv += next_layer_error[i, j, z] * self.next_layer.w[z][x - i, y - j, f]
-                    delta[x, y, f] = conv
+                    for i in xrange(0, next_layer_delta.shape[0]):
+                        for j in xrange(0, next_layer_delta.shape[1]):
+                            for f in xrange(0, next_layer_delta.shape[2]):
+                                conv += next_layer_delta[i, j, f] * self.next_layer.w[f][x - i, y - j, z]
+                    delta[x, y, z] = conv
 
-        # self.prev_layer.prev_out - holds last output of previous_layer
+        # calc dE/dW
+        for f in xrange(0, next_layer_delta.shape[2]):
+            for z in xrange(self.w[f].shape[2]):
+                for y in xrange(self.w[f].shape[1]):
+                    for x in xrange(self.w[f].shape[0]):
+
+                        conv = 0.0
+                        for i in xrange(0, next_layer_delta.shape[0]):
+                            for j in xrange(0, next_layer_delta.shape[1]):
+                                conv += next_layer_delta[i, j, f] * self.prev_layer.prev_out[i + x, j + y, z]
+
+                        self.delta_e[f][x, y, z] = conv
+
+        return delta
