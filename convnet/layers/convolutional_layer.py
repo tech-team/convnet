@@ -44,8 +44,10 @@ class ConvolutionalLayer(BaseLayer):
 
         f = settings.filter_size
         self.w = [np.zeros((f, f, settings.in_depth)) for _ in xrange(settings.filters_count)]
-        self.delta_e = [np.zeros((f, f, settings.in_depth)) for _ in xrange(settings.filters_count)]
+        self.delta_w = [np.zeros((f, f, settings.in_depth)) for _ in xrange(settings.filters_count)]
+
         self.b = [0] * settings.filters_count
+        self.delta_b = [0] * settings.filters_count
 
     def _forward(self, data):
         assert data.shape == self.settings.in_shape, \
@@ -111,19 +113,28 @@ class ConvolutionalLayer(BaseLayer):
                         for j in xrange(0, next_layer_delta.shape[1]):
                             for f in xrange(0, next_layer_delta.shape[2]):
                                 conv += next_layer_delta[i, j, f] * self.next_layer.w[f][x - i, y - j, z]
-                    delta[x, y, z] = conv
+                    delta[x, y, z] += conv
 
         # calc dE/dW
-        for f in xrange(0, next_layer_delta.shape[2]):
+        for f in xrange(len(self.w)):
             for z in xrange(self.w[f].shape[2]):
                 for y in xrange(self.w[f].shape[1]):
                     for x in xrange(self.w[f].shape[0]):
 
                         conv = 0.0
-                        for i in xrange(0, next_layer_delta.shape[0]):
-                            for j in xrange(0, next_layer_delta.shape[1]):
+                        for i in xrange(next_layer_delta.shape[0]):
+                            for j in xrange(next_layer_delta.shape[1]):
                                 conv += next_layer_delta[i, j, f] * self.prev_layer.prev_out[i + x, j + y, z]
 
-                        self.delta_e[f][x, y, z] = conv
+                        self.delta_w[f][x, y, z] += conv
+
+        # calc dE/dB
+        for f in xrange(len(self.b)):
+            conv = 0.0
+            for i in xrange(next_layer_delta.shape[0]):
+                for j in xrange(next_layer_delta.shape[1]):
+                    conv += next_layer_delta[i, j, f]
+
+            self.delta_b[f] += conv
 
         return delta

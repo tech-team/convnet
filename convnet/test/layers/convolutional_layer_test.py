@@ -99,5 +99,35 @@ class ConvolutionalLayerTest(unittest.TestCase):
              [3., 0.]]]))
 
     def test_backward(self):
-        # TODO: test
-        assert False
+        arr1 = np.empty((5, 5, 1))
+        arr1[:, :, 0] = np.array([
+            [1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0]
+        ])
+
+        arr2 = np.empty((5, 5, 1))
+        arr2[:, :, 0] = np.array([
+            [0, 0, 1, 0, 0],
+            [0, 1, 0, 0, 0],
+            [1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0]
+        ])
+
+        samples = [arr1, arr2]
+
+        s = ConvolutionalLayerSettings(
+                in_shape=arr.shape,
+                filter_size=1,
+                stride=1,
+                filters_count=1,
+                zero_padding=1)
+        l = ConvolutionalLayer(s)
+
+        for sample in samples:
+            res = l.forward(sample)
+
+
