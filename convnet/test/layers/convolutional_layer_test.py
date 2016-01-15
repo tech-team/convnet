@@ -2,8 +2,9 @@ import unittest
 
 import numpy as np
 
-from convnet.layers.convolutional_layer import ConvolutionalLayerSettings, ConvolutionalLayer
-from convnet.layers.input_layer import InputLayer, InputLayerSettings
+from convnet.layers.convolutional_layer import ConvolutionalLayerSettings, _ConvolutionalLayer, ConvolutionalLayer
+from convnet.layers.input_layer import _InputLayer, InputLayerSettings, InputLayer
+from convnet.net import ConvNet
 
 
 class ConvolutionalLayerTest(unittest.TestCase):
@@ -40,7 +41,7 @@ class ConvolutionalLayerTest(unittest.TestCase):
             [0, 1, 1, 1, 2],
         ])
         s = ConvolutionalLayerSettings(in_shape=arr.shape, filter_size=3, stride=2, filters_count=2, zero_padding=1)
-        l = ConvolutionalLayer(s)
+        l = _ConvolutionalLayer(s)
 
         w0 = np.empty((3, 3, 3))
         w0[:, :, 0] = np.array([
@@ -123,37 +124,34 @@ class ConvolutionalLayerTest(unittest.TestCase):
 
         expected_res = [expected_res1, expected_res2]
 
-        input_layer = InputLayer(InputLayerSettings(arr1.shape))
+        net = ConvNet()
+        net.setup_layers([
+            InputLayer(InputLayerSettings(in_shape=arr1.shape)),
+            ConvolutionalLayer(ConvolutionalLayerSettings(filter_size=3,
+                                                          stride=1,
+                                                          filters_count=2,
+                                                          zero_padding=0))
+        ])
 
-        s = ConvolutionalLayerSettings(
-                in_shape=arr1.shape,
-                filter_size=3,
-                stride=1,
-                filters_count=2,
-                zero_padding=0)
-        conv_layer = ConvolutionalLayer(s)
-        conv_layer.prev_layer = input_layer
-
-        # before update
+        # before learn
         res_before = []
         for i in xrange(len(samples)):
-            res = input_layer.forward(samples[i])
-            res = conv_layer.forward(res)
+            res = net.predict(samples[i])
             res_before.append(res)
 
-            conv_layer.backward(expected_res[i])
-
-        # update weights
+        # calc distance before
         dist_before = get_dist(res_before, expected_res)
-        conv_layer.update_weights(len(samples))
 
-        # after update
+        # learning
+        net.fit(samples, expected_res)
+
+        # after learn
         res_after = []
         for i in xrange(len(samples)):
-            res = input_layer.forward(samples[i])
-            res = conv_layer.forward(res)
+            res = net.predict(samples[i])
             res_after.append(res)
 
+        # calc distance after
         dist_after = get_dist(res_after, expected_res)
 
         print 'Before: %s' % dist_before

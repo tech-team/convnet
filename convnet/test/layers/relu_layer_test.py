@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from convnet.layers.relu_layer import ReluLayerSettings, ReluLayer
+from convnet.layers.relu_layer import ReluLayerSettings, _ReluLayer
 
 
 class ReluLayerTest(unittest.TestCase):
@@ -10,7 +10,7 @@ class ReluLayerTest(unittest.TestCase):
         np.set_printoptions(precision=4, linewidth=120)
         arr = np.random.uniform(-5, 5, 48).reshape((4, 4, 3))
         s = ReluLayerSettings(in_shape=arr.shape, activation='max')
-        l = ReluLayer(s)
+        l = _ReluLayer(s)
         res = l.forward(arr)
 
         print(arr[:, :, 0])

@@ -1,10 +1,10 @@
 import numpy as np
 
-from convnet.layers.base_layer import BaseLayer, BaseLayerSettings
+from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings
 
 
 class PoolingLayerSettings(BaseLayerSettings):
-    def __init__(self, in_shape, filter_size, stride=1):
+    def __init__(self, in_shape=None, filter_size=1, stride=1):
         super(PoolingLayerSettings, self).__init__(in_shape=in_shape)
 
         self.filter_size = filter_size  # F
@@ -23,13 +23,13 @@ class PoolingLayerSettings(BaseLayerSettings):
         return self.in_depth
 
 
-class PoolingLayer(BaseLayer):
+class _PoolingLayer(_BaseLayer):
     def __init__(self, settings):
         """
         :param settings: Pooling layer settings
         :type settings: PoolingLayerSettings
         """
-        super(PoolingLayer, self).__init__(settings)
+        super(_PoolingLayer, self).__init__(settings)
 
     def forward(self, data):
         res = np.empty(self.settings.out_shape)

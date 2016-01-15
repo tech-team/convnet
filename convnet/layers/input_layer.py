@@ -1,6 +1,6 @@
 import numpy as np
 
-from convnet.layers.base_layer import BaseLayer, BaseLayerSettings
+from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings, BaseLayer
 
 
 class InputLayerSettings(BaseLayerSettings):
@@ -17,13 +17,13 @@ class InputLayerSettings(BaseLayerSettings):
         return self.in_width
 
 
-class InputLayer(BaseLayer):
+class _InputLayer(_BaseLayer):
     def __init__(self, settings):
         """
         :param settings: Input layer settings
         :type settings: InputLayerSettings
         """
-        super(InputLayer, self).__init__(settings)
+        super(_InputLayer, self).__init__(settings)
 
     def forward(self, data):
         self.prev_out = data
@@ -32,3 +32,13 @@ class InputLayer(BaseLayer):
     def backward(self, next_layer_delta):
         return next_layer_delta
 
+
+class InputLayer(BaseLayer):
+    def __init__(self, settings):
+        """
+        :type settings: InputLayerSettings
+        """
+        super(InputLayer, self).__init__(settings)
+
+    def create(self):
+        return _InputLayer(self.settings)

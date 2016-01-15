@@ -1,25 +1,17 @@
 import numpy as np
 
 from convnet import utils
-from convnet.layers.base_layer import BaseLayer, BaseLayerSettings
+from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings, BaseLayer
 
 
 class ConvolutionalLayerSettings(BaseLayerSettings):
-    def __init__(self, in_shape, filters_count=1, filter_size=None, stride=1, zero_padding=None):
+    def __init__(self, in_shape=None, filters_count=1, filter_size=None, stride=1, zero_padding=None):
         super(ConvolutionalLayerSettings, self).__init__(in_shape=in_shape)
 
         self.filters_count = filters_count  # K
         self.filter_size = filter_size if filter_size is not None else self.in_width  # F
         self.stride = stride  # S
         self.zero_padding = zero_padding  # P
-
-        out_width = (self.in_width - self.filter_size + 2.0 * self.zero_padding) / self.stride + 1
-        assert out_width % 1 == 0, \
-            "out_width == {}, but should be integer".format(out_width)
-
-        out_height = (self.in_height - self.filter_size + 2.0 * self.zero_padding) / self.stride + 1
-        assert out_height % 1 == 0, \
-            "out_width == {}, but should be integer".format(out_height)
 
     @property
     def out_width(self):
@@ -33,14 +25,27 @@ class ConvolutionalLayerSettings(BaseLayerSettings):
     def out_depth(self):
         return self.filters_count
 
+    def check(self):
+        super(ConvolutionalLayerSettings, self).check()
 
-class ConvolutionalLayer(BaseLayer):
+        assert self.filter_size is not None, "Filter size is not allowed to be None"
+
+        out_width = (self.in_width - self.filter_size + 2.0 * self.zero_padding) / self.stride + 1
+        assert out_width % 1 == 0, \
+            "out_width == {}, but should be integer".format(out_width)
+
+        out_height = (self.in_height - self.filter_size + 2.0 * self.zero_padding) / self.stride + 1
+        assert out_height % 1 == 0, \
+            "out_width == {}, but should be integer".format(out_height)
+
+
+class _ConvolutionalLayer(_BaseLayer):
     def __init__(self, settings):
         """
         :param settings: Convolutional layer settings
         :type settings: ConvolutionalLayerSettings
         """
-        super(ConvolutionalLayer, self).__init__(settings)
+        super(_ConvolutionalLayer, self).__init__(settings)
 
         f = settings.filter_size
         self.w = [np.zeros((f, f, settings.in_depth)) for _ in xrange(settings.filters_count)]
@@ -153,3 +158,14 @@ class ConvolutionalLayer(BaseLayer):
 
             self.b[f] -= self.db[f]
             self.db[f] = 0
+
+
+class ConvolutionalLayer(BaseLayer):
+    def __init__(self, settings):
+        """
+        :type settings: ConvolutionalLayerSettings
+        """
+        super(ConvolutionalLayer, self).__init__(settings)
+
+    def create(self):
+        return _ConvolutionalLayer(self.settings)

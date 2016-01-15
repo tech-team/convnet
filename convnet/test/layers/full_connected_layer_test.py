@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from convnet.layers.full_connected_layer import FullConnectedLayerSettings, FullConnectedLayer
+from convnet.layers.full_connected_layer import FullConnectedLayerSettings, _FullConnectedLayer
 
 
 class FullConnectedLayerTest(unittest.TestCase):
@@ -36,7 +36,7 @@ class FullConnectedLayerTest(unittest.TestCase):
         expected_res = [[[4]]]
 
         s = FullConnectedLayerSettings(in_shape=x.shape, neurons_count=1)
-        l = FullConnectedLayer(s)
+        l = _FullConnectedLayer(s)
         l.w = w
         l.b = b
 

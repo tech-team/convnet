@@ -4,28 +4,34 @@ import numpy as np
 
 
 class BaseLayerSettings(object):
-    def __init__(self, in_shape):
+    def __init__(self, in_shape=None):
         super(BaseLayerSettings, self).__init__()
-
-        assert len(in_shape) == 3, "Only 3-dimensional layers are allowed"
-        assert in_shape[0] == in_shape[1], "input's width and height have to be the same"
         self._in_shape = in_shape
+        if self._in_shape is not None:
+            BaseLayerSettings.check(self)
 
     @property
     def in_shape(self):
         return self._in_shape
 
+    @in_shape.setter
+    def in_shape(self, in_shape):
+        self._in_shape = in_shape
+        if self._in_shape is not None:
+            self.in_shape_changed()
+            self.check()
+
     @property
     def in_width(self):
-        return self._in_shape[0]
+        return self._in_shape[0] if self._in_shape is not None else None
 
     @property
     def in_height(self):
-        return self._in_shape[1]
+        return self._in_shape[1] if self._in_shape is not None else None
 
     @property
     def in_depth(self):
-        return self._in_shape[2]
+        return self._in_shape[2] if self._in_shape is not None else None
 
     @property
     def out_shape(self):
@@ -46,14 +52,21 @@ class BaseLayerSettings(object):
     def out_depth(self):
         pass
 
+    def check(self):
+        assert len(self.in_shape) == 3, "Only 3-dimensional layers are allowed"
+        assert self.in_shape[0] == self.in_shape[1], "input's width and height have to be the same"
 
-class BaseLayer(object):
+    def in_shape_changed(self):
+        pass
+
+
+class _BaseLayer(object):
     def __init__(self, settings):
         """
         :param settings: layer settings
         :type settings: BaseLayerSettings
         """
-        super(BaseLayer, self).__init__()
+        super(_BaseLayer, self).__init__()
 
         self.settings = settings
         self.prev_layer = None
@@ -62,8 +75,8 @@ class BaseLayer(object):
 
     def setup_layers(self, prev_layer, next_layer=None):
         """
-        :type prev_layer: BaseLayer
-        :type next_layer: BaseLayer
+        :type prev_layer: _BaseLayer
+        :type next_layer: _BaseLayer
         """
         self.prev_layer = prev_layer
         self.next_layer = next_layer
@@ -93,4 +106,18 @@ class BaseLayer(object):
         :param samples_count: Samples count or None to apply an entire gradient without averaging
         :type samples_count: int
         """
+        pass
+
+
+class BaseLayer(object):
+    def __init__(self, settings):
+        """
+        :param settings: Layer settings
+        :type settings: BaseLayerSettings
+        """
+        super(BaseLayer, self).__init__()
+        self.settings = settings
+
+    @abc.abstractmethod
+    def create(self):
         pass

@@ -1,13 +1,13 @@
 import numpy as np
 
-from convnet.layers.base_layer import BaseLayer, BaseLayerSettings
+from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings
 
 
 class ReluLayerSettings(BaseLayerSettings):
     """
     activation - string, containing a name of desired activation func (refer to ReluLayer.ACTIVATIONS
     """
-    def __init__(self, in_shape, activation='max'):
+    def __init__(self, in_shape=None, activation='max'):
         super(ReluLayerSettings, self).__init__(in_shape=in_shape)
         self.activation = activation
 
@@ -24,7 +24,7 @@ class ReluLayerSettings(BaseLayerSettings):
         return self.in_depth
 
 
-class ReluLayer(BaseLayer):
+class _ReluLayer(_BaseLayer):
     ACTIVATIONS = {
         'max': lambda x: np.maximum(x, 0),
         'sigmoid': lambda x: 1.0 / (1 + np.exp(-1.0 * x))
@@ -35,7 +35,7 @@ class ReluLayer(BaseLayer):
         :param settings: Relu layer settings
         :type settings: ReluLayerSettings
         """
-        super(ReluLayer, self).__init__(settings)
+        super(_ReluLayer, self).__init__(settings)
 
     def forward(self, data):
         return self.activation(data)
