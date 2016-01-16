@@ -30,6 +30,7 @@ class _PoolingLayer(_BaseLayer):
         :type settings: PoolingLayerSettings
         """
         super(_PoolingLayer, self).__init__(settings)
+        self.max_indices = np.zeros(self.settings.out_shape, dtype=(int, 2))
 
     def forward(self, data):
         res = np.empty(self.settings.out_shape)
@@ -45,11 +46,42 @@ class _PoolingLayer(_BaseLayer):
                 for x in xrange(0, self.settings.out_width):
                     x_offset = x * self.settings.stride
 
-                    res[i, j, z] = np.max(data_slice[x_offset:x_offset + f, y_offset:y_offset + f])
+                    piece = data_slice[x_offset:x_offset + f, y_offset:y_offset + f]
+                    max_index = np.unravel_index(piece.argmax(), piece.shape)
+                    res[i, j, z] = piece[max_index]
+                    self.max_indices[i, j, z] = tuple(max_index)
                     i += 1
                 j += 1
 
+        self.prev_out = res
         return res
 
-    def backward(self, next_layer_delta):
-        pass
+    def _compute_prev_layer_delta(self, current_layer_delta):
+        delta = current_layer_delta
+
+        res = np.zeros(self.settings.in_shape)
+
+        f = self.settings.filter_size
+        for z in xrange(0, delta.shape[2]):
+            res_slice = res[:, :, z]
+
+            for y in xrange(0, delta.shape[1]):
+                y_offset = y * self.settings.stride
+
+                for x in xrange(0, delta.shape[0]):
+                    x_offset = x * self.settings.stride
+
+                    piece = res_slice[x_offset:x_offset + f, y_offset:y_offset + f]
+
+                    value = delta[x, y, z]
+                    max_index = self.max_indices[x, y, z]
+                    piece[tuple(max_index)] = value
+
+        return res
+
+    def backward(self, current_layer_delta):
+        return self._compute_prev_layer_delta(current_layer_delta)
+
+    def update_weights(self, samples_count=None):
+        super(_PoolingLayer, self).update_weights(samples_count)
+        self.max_indices = np.zeros(self.max_indices.shape)

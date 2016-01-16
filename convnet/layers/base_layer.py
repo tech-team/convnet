@@ -82,6 +82,10 @@ class _BaseLayer(object):
         self.next_layer = next_layer
 
     @property
+    def is_input(self):
+        return self.prev_layer is None
+
+    @property
     def is_output(self):
         return self.next_layer is None
 
@@ -93,11 +97,36 @@ class _BaseLayer(object):
         """
         pass
 
-    @abc.abstractmethod
-    def backward(self, next_layer_delta):
+    def _compute_prev_layer_delta(self, current_layer_delta):
         """
-        :param next_layer_delta: Next layer's delta
-        :type next_layer_delta: np.ndarray
+        :param current_layer_delta: Current layer's delta
+        :type current_layer_delta: np.ndarray
+        """
+        if not hasattr(self, 'w'):
+            raise StandardError(
+                "Current layer has no weights matrix, should define custom _compute_prev_layer_delta function")
+
+        if self.prev_layer.is_input:
+            return None
+
+        delta = np.empty(self.settings.out_shape)
+        for z in xrange(delta.shape[2]):
+            for y in xrange(delta.shape[1]):
+                for x in xrange(delta.shape[0]):
+                    conv = 0.0
+                    for i in xrange(0, current_layer_delta.shape[0]):
+                        for j in xrange(0, current_layer_delta.shape[1]):
+                            for f in xrange(0, current_layer_delta.shape[2]):
+                                conv += current_layer_delta[i, j, f] * self.w[f][x - i, y - j, z]
+                    delta[x, y, z] += conv
+        return delta
+
+    @abc.abstractmethod
+    def backward(self, current_layer_delta):
+        """
+        :param current_layer_delta: Current layer's delta
+        :type current_layer_delta: np.ndarray
+        :returns Previous layer's delta
         """
         pass
 
