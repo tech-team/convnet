@@ -11,7 +11,7 @@ class ConvolutionalLayerSettings(BaseLayerSettings):
         self.filters_count = filters_count  # K
         self.filter_size = filter_size if filter_size is not None else self.in_width  # F
         self.stride = stride  # S
-        self.zero_padding = zero_padding  # P
+        self.zero_padding = zero_padding if zero_padding is not None else 0  # P
 
     @property
     def out_width(self):
@@ -104,21 +104,9 @@ class _ConvolutionalLayer(_BaseLayer):
         self.prev_out = res
         return res
 
-    def backward(self, next_layer_delta):
-        # calc delta
+    def backward(self, current_layer_delta):
         if self.is_output:
-            delta = self.prev_out - next_layer_delta
-        else:
-            delta = np.empty(self.settings.out_shape)
-            for z in xrange(delta.shape[2]):
-                for y in xrange(delta.shape[1]):
-                    for x in xrange(delta.shape[0]):
-                        conv = 0.0
-                        for i in xrange(0, next_layer_delta.shape[0]):
-                            for j in xrange(0, next_layer_delta.shape[1]):
-                                for f in xrange(0, next_layer_delta.shape[2]):
-                                    conv += next_layer_delta[i, j, f] * self.next_layer.w[f][x - i, y - j, z]
-                        delta[x, y, z] += conv
+            current_layer_delta = self.prev_out - current_layer_delta
 
         # calc dE/dW
         for f in xrange(len(self.w)):
@@ -127,22 +115,24 @@ class _ConvolutionalLayer(_BaseLayer):
                     for x in xrange(self.w[f].shape[0]):
 
                         conv = 0.0
-                        for i in xrange(delta.shape[0]):
-                            for j in xrange(delta.shape[1]):
-                                conv += delta[i, j, f] * self.prev_layer.prev_out[i + x, j + y, z]
+                        for i in xrange(current_layer_delta.shape[0]):
+                            for j in xrange(current_layer_delta.shape[1]):
+                                conv += current_layer_delta[i, j, f] * self.prev_layer.prev_out[i + x, j + y, z]
 
                         self.dw[f][x, y, z] += conv
 
         # calc dE/dB
         for f in xrange(len(self.b)):
             conv = 0.0
-            for i in xrange(delta.shape[0]):
-                for j in xrange(delta.shape[1]):
-                    conv += delta[i, j, f]
+            for i in xrange(current_layer_delta.shape[0]):
+                for j in xrange(current_layer_delta.shape[1]):
+                    conv += current_layer_delta[i, j, f]
 
             self.db[f] += conv
 
-        return delta
+        # calc delta
+        prev_layer_delta = self._compute_prev_layer_delta(current_layer_delta)
+        return prev_layer_delta
 
     def update_weights(self, samples_count=None):
         for f in xrange(len(self.w)):

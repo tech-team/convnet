@@ -16,8 +16,7 @@ class ConvNet(object):
 
         # Step 1. Initialize in_shape in each layer except of the first
         for i in xrange(1, len(layers)):
-            prev_settings = layers[i - 1].settings
-            layers[i].settings.in_shape = (prev_settings.out_width(), prev_settings.out_height(), prev_settings.out_depth())
+            layers[i].settings.in_shape = layers[i - 1].settings.out_shape
 
         # Step 2. Create layers themselves
         layers = [l.create() for l in layers]

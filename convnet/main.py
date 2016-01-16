@@ -1,5 +1,6 @@
 import numpy as np
 
+from convnet.layers.convolutional_layer import ConvolutionalLayer, ConvolutionalLayerSettings
 from convnet.net import ConvNet
 from convnet.layers.full_connected_layer import FullConnectedLayerSettings, FullConnectedLayer
 from convnet.layers.input_layer import InputLayerSettings, InputLayer
@@ -13,6 +14,7 @@ if __name__ == "__main__":
     net = ConvNet()
     net.setup_layers([
         InputLayer(InputLayerSettings(in_shape=X[0].shape)),
+        # ConvolutionalLayer(ConvolutionalLayerSettings(filter_size=2, filters_count=2, stride=1)),
         FullConnectedLayer(FullConnectedLayerSettings(neurons_count=y[0].shape[-1]))
     ])
 

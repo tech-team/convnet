@@ -40,7 +40,7 @@ class _ReluLayer(_BaseLayer):
     def forward(self, data):
         return self.activation(data)
 
-    def backward(self, next_layer_delta):
+    def backward(self, current_layer_delta):
         pass
 
     def activation(self, x):
