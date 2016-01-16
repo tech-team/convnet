@@ -22,7 +22,7 @@ define([
             var $layers = this.$el.find('#layers-container');
             $layers.sortable();
 
-            $layers.on('.remove click', (e) => {
+            $layers.on('click', '.remove', (e) => {
                 $(e.target).closest('.layer').remove();
             });
 
