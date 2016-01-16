@@ -1,6 +1,6 @@
 import numpy as np
 
-from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings
+from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings, BaseLayer
 
 
 class PoolingLayerSettings(BaseLayerSettings):
@@ -24,12 +24,12 @@ class PoolingLayerSettings(BaseLayerSettings):
 
 
 class _PoolingLayer(_BaseLayer):
-    def __init__(self, settings):
+    def __init__(self, settings, net_settings=None):
         """
         :param settings: Pooling layer settings
         :type settings: PoolingLayerSettings
         """
-        super(_PoolingLayer, self).__init__(settings)
+        super(_PoolingLayer, self).__init__(settings, net_settings)
         self.max_indices = np.zeros(self.settings.out_shape, dtype=(int, 2))
 
     def forward(self, data):
@@ -80,8 +80,21 @@ class _PoolingLayer(_BaseLayer):
         return res
 
     def backward(self, current_layer_delta):
+        if self.is_output:
+            current_layer_delta = self.prev_out - current_layer_delta
         return self._compute_prev_layer_delta(current_layer_delta)
 
     def update_weights(self, samples_count=None):
         super(_PoolingLayer, self).update_weights(samples_count)
         self.max_indices = np.zeros(self.max_indices.shape)
+
+
+class PoolingLayer(BaseLayer):
+    def __init__(self, settings):
+        """
+        :type settings: PoolingLayerSettings
+        """
+        super(PoolingLayer, self).__init__(settings)
+
+    def create(self):
+        return _PoolingLayer(self.settings, self.net_settings)

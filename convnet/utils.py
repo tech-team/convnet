@@ -21,3 +21,51 @@ def col2im(col, w, h, d):
         .swapaxes(0, 1)\
         .reshape((w, h, d))\
         .swapaxes(0, 1)
+
+
+def arr_1d_to_3d(arr):
+    return np.asarray(arr)[:, np.newaxis, np.newaxis]
+
+
+def y_1d_to_3d(arr):
+    return np.asarray(arr)[np.newaxis, np.newaxis, :]
+
+
+def arr_2d_to_3d(arr):
+    return np.asarray(arr)[:, :, np.newaxis]
+
+
+def input_2d_to_3d(arr):
+    new_arr = []
+    for a in arr:
+        new_arr.append(arr_2d_to_3d(a))
+    return new_arr
+
+
+def input_1d_to_3d(arr):
+    new_arr = []
+    for a in arr:
+        new_arr.append(arr_1d_to_3d(a))
+    return new_arr
+
+
+def to_3d(arr):
+    new_arr = []
+    for a in arr:
+        if len(a.shape) == 2:
+            new_arr.append(arr_2d_to_3d(a))
+        elif len(a.shape) == 1:
+            new_arr.append(arr_1d_to_3d(a))
+        else:
+            raise StandardError("Unsupported input shape")
+    return new_arr
+
+
+def y_to_3d(arr):
+    new_arr = []
+    for a in arr:
+        if len(a.shape) == 1:
+            new_arr.append(y_1d_to_3d(a))
+        else:
+            raise StandardError("Unsupported input shape")
+    return new_arr

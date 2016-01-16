@@ -1,6 +1,6 @@
 import numpy as np
 
-from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings
+from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings, BaseLayer
 
 
 class ReluLayerSettings(BaseLayerSettings):
@@ -36,24 +36,41 @@ class _ReluLayer(_BaseLayer):
         },
     }
 
-    def __init__(self, settings):
+    def __init__(self, settings, net_settings=None):
         """
         :param settings: Relu layer settings
         :type settings: ReluLayerSettings
         """
-        super(_ReluLayer, self).__init__(settings)
+        super(_ReluLayer, self).__init__(settings, net_settings)
 
     def forward(self, data):
-        return self.activation(data)
+        self.prev_out = self.activation(data)
+        return self.prev_out
 
-    def backward(self, current_layer_delta):
+    def _compute_prev_layer_delta(self, current_layer_delta):
         shape = current_layer_delta.shape
         values = current_layer_delta.reshape(-1)
         res = values * self.derivative(values)
         return res.reshape(shape)
+
+    def backward(self, current_layer_delta):
+        if self.is_output:
+            current_layer_delta = self.prev_out - current_layer_delta
+        return self._compute_prev_layer_delta(current_layer_delta)
 
     def activation(self, x):
         return self.ACTIVATIONS[self.settings.activation]['f'](x)
 
     def derivative(self, x):
         return self.ACTIVATIONS[self.settings.activation]['df'](x)
+
+
+class ReluLayer(BaseLayer):
+    def __init__(self, settings):
+        """
+        :type settings: ReluLayerSettings
+        """
+        super(ReluLayer, self).__init__(settings)
+
+    def create(self):
+        return _ReluLayer(self.settings, self.net_settings)

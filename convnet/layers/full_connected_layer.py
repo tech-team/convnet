@@ -18,12 +18,12 @@ class FullConnectedLayerSettings(ConvolutionalLayerSettings):
 
 
 class _FullConnectedLayer(_ConvolutionalLayer):
-    def __init__(self, settings):
+    def __init__(self, settings, net_settings=None):
         """
         :param settings: Full connected layer settings
         :type settings: FullConnectedLayerSettings
         """
-        super(_FullConnectedLayer, self).__init__(settings)
+        super(_FullConnectedLayer, self).__init__(settings, net_settings)
 
 
 class FullConnectedLayer(BaseLayer):
@@ -34,4 +34,4 @@ class FullConnectedLayer(BaseLayer):
         super(FullConnectedLayer, self).__init__(settings)
 
     def create(self):
-        return _FullConnectedLayer(self.settings)
+        return _FullConnectedLayer(self.settings, self.net_settings)

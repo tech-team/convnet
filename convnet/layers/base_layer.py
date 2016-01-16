@@ -61,14 +61,18 @@ class BaseLayerSettings(object):
 
 
 class _BaseLayer(object):
-    def __init__(self, settings):
+    def __init__(self, settings, net_settings=None):
         """
         :param settings: layer settings
         :type settings: BaseLayerSettings
+
+        :param net_settings: Net settings
+        :type net_settings: convnet.net.ConvNetSettings
         """
         super(_BaseLayer, self).__init__()
 
         self.settings = settings
+        self.net_settings = net_settings
         self.prev_layer = None
         self.next_layer = None
         self.prev_out = None
@@ -146,6 +150,7 @@ class BaseLayer(object):
         """
         super(BaseLayer, self).__init__()
         self.settings = settings
+        self.net_settings = None
 
     @abc.abstractmethod
     def create(self):

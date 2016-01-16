@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from convnet.layers.convolutional_layer import ConvolutionalLayerSettings, _ConvolutionalLayer, ConvolutionalLayer
-from convnet.layers.input_layer import _InputLayer, InputLayerSettings, InputLayer
+from convnet.layers.input_layer import InputLayerSettings, InputLayer
 from convnet.net import ConvNet
 
 

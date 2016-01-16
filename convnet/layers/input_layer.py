@@ -21,12 +21,12 @@ class InputLayerSettings(BaseLayerSettings):
 
 
 class _InputLayer(_BaseLayer):
-    def __init__(self, settings):
+    def __init__(self, settings, net_settings=None):
         """
         :param settings: Input layer settings
         :type settings: InputLayerSettings
         """
-        super(_InputLayer, self).__init__(settings)
+        super(_InputLayer, self).__init__(settings, net_settings)
 
     def forward(self, data):
         self.prev_out = data
@@ -44,4 +44,4 @@ class InputLayer(BaseLayer):
         super(InputLayer, self).__init__(settings)
 
     def create(self):
-        return _InputLayer(self.settings)
+        return _InputLayer(self.settings, self.net_settings)

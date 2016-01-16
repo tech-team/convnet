@@ -40,12 +40,12 @@ class ConvolutionalLayerSettings(BaseLayerSettings):
 
 
 class _ConvolutionalLayer(_BaseLayer):
-    def __init__(self, settings):
+    def __init__(self, settings, net_settings=None):
         """
         :param settings: Convolutional layer settings
         :type settings: ConvolutionalLayerSettings
         """
-        super(_ConvolutionalLayer, self).__init__(settings)
+        super(_ConvolutionalLayer, self).__init__(settings, net_settings)
 
         f = settings.filter_size
         self.w = [np.zeros((f, f, settings.in_depth)) for _ in xrange(settings.filters_count)]
@@ -139,14 +139,14 @@ class _ConvolutionalLayer(_BaseLayer):
             if samples_count:
                 self.dw[f] /= samples_count
 
-            self.w[f] -= self.dw[f]
+            self.w[f] -= self.net_settings.learning_rate * self.dw[f]
             self.dw[f] = np.zeros(self.dw[f].shape)
 
         for f in xrange(len(self.b)):
             if samples_count:
                 self.db[f] /= samples_count
 
-            self.b[f] -= self.db[f]
+            self.b[f] -= self.net_settings.learning_rate * self.db[f]
             self.db[f] = 0
 
 
@@ -158,4 +158,4 @@ class ConvolutionalLayer(BaseLayer):
         super(ConvolutionalLayer, self).__init__(settings)
 
     def create(self):
-        return _ConvolutionalLayer(self.settings)
+        return _ConvolutionalLayer(self.settings, self.net_settings)
