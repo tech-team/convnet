@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}ConvNet WebApp{% end %}
+
+{% block extra_css %}
+{% end %}
+
+
+{% block header %}
+    <h1>Net Config</h1>
+{% end %}
+
+{% block content %}
+<section class="page config-page">
+    <section class="accordion">
+        <h3>Common props</h3>
+        <div>
+            <table id="common-props" class="table table-striped">
+                <script id="common-props-template" language="text/handlebars">
+                    <tbody>
+                        <tr>
+                            <td class="key-cell">Learn rate:</td>
+                            <td><input type="number" class="value" data-key="learnRate" value="[[c.learnRate]]"></td>
+                        </tr>
+                    </tbody>
+                </script>
+            </table>
+        </div>
+    </section>
+    <hr>
+
+    <section class="accordion">
+        <h3>Layers</h3>
+        <div id="layers-container">
+            <script id="layer-template" language="text/handlebars">
+                <div class="accordion layer">
+                    <h3>
+                        [[l.name]]
+                        <div class="pull-right">
+                            <button class="btn btn-sm btn-danger remove">X</button>
+                        </div>
+                    </h3>
+                    <div>
+                        <table class="table table-striped">
+                            <tr>
+                                <td class="key-cell">Type:</td>
+                                <td>
+                                    <select class="value" data-key="type">
+                                    [[#select l.type]]
+                                        <option value="input">input</option>
+                                        <option value="conv">conv</option>
+                                        <option value="relu">relu</option>
+                                        <option value="pool">pool</option>
+                                        <option value="full">full</option>
+                                    [[/select]]
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="key-cell">Width:</td>
+                                <td><input type="number" class="value" data-key="w" value="[[l.w]]"></td>
+                            </tr>
+                            <tr>
+                                <td class="key-cell">Height:</td>
+                                <td><input type="number" class="value" data-key="h" value="[[l.h]]"></td>
+                            </tr>
+                            <tr>
+                                <td class="key-cell">Depth:</td>
+                                <td><input type="number" class="value" data-key="d" value="[[l.d]]"></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </script>
+        </div>
+        <button class="btn btn-primary add">Add layer</button>
+        <button class="btn btn-success pull-right save">Save config</button>
+    </section>
+</section>
+{% end %}

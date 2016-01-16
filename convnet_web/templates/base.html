@@ -15,21 +15,23 @@
 </head>
 <body>
 
-    <div class="container">
-        <header>
-            {% block header %}
-            {% end %}
-        </header>
+    <div class="root-container container">
+        <div class="container">
+            <header>
+                {% block header %}
+                {% end %}
+            </header>
 
-        {% block content %}
-        {% end %}
+            {% block content %}
+            {% end %}
+        </div>
 
         <footer>
             {% block footer %}
                 GitHub: <a href="https://github.com/tech-team/convnet">tech-team/convnet</a><br>
                 Латкин Игорь, Леонтьев Алексей | МГТУ имени Н. Э. Баумана, 2016 г.
             {% end %}
-        </footer> 
+        </footer>
     </div>
 
     <script>

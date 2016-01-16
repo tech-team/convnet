@@ -3,6 +3,7 @@ require.config({
     baseUrl: "static/js",
     paths: {
         jquery: "../components/jquery/dist/jquery",
+        'jquery-ui': '../components/jquery-ui/jquery-ui',
         bootstrap: "../components/bootstrap/dist/js/bootstrap",
         backbone: "../components/backbone/backbone",
         underscore: "../components/underscore/underscore",
