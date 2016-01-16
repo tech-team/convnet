@@ -26,8 +26,14 @@ class ReluLayerSettings(BaseLayerSettings):
 
 class _ReluLayer(_BaseLayer):
     ACTIVATIONS = {
-        'max': lambda x: np.maximum(x, 0),
-        'sigmoid': lambda x: 1.0 / (1 + np.exp(-1.0 * x))
+        'max': {
+            'f': lambda x: np.maximum(x, 0),
+            'df': np.vectorize(lambda x: 1 if x > 0 else 0),
+        },
+        'sigmoid': {
+            'f': lambda x: 1.0 / (1 + np.exp(-1.0 * x)),
+            'df': lambda x: _ReluLayer.ACTIVATIONS['sigmoid']['f'](x) * (1 - _ReluLayer.ACTIVATIONS['sigmoid']['f'](x)),
+        },
     }
 
     def __init__(self, settings):
@@ -41,7 +47,13 @@ class _ReluLayer(_BaseLayer):
         return self.activation(data)
 
     def backward(self, current_layer_delta):
-        pass
+        shape = current_layer_delta.shape
+        values = current_layer_delta.reshape(-1)
+        res = values * self.derivative(values)
+        return res.reshape(shape)
 
     def activation(self, x):
-        return self.ACTIVATIONS[self.settings.activation](x)
+        return self.ACTIVATIONS[self.settings.activation]['f'](x)
+
+    def derivative(self, x):
+        return self.ACTIVATIONS[self.settings.activation]['df'](x)

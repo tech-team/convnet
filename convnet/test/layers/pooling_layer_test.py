@@ -8,7 +8,7 @@ class PoolingLayerTest(unittest.TestCase):
     def setUp(self):
         np.set_printoptions(precision=4, linewidth=120)
         np.random.seed(10)
-        print('#####################################')
+        print('################### %s ################### ' % self._testMethodName)
 
     def test_forward(self):
         arr = np.random.rand(4, 4, 3)
