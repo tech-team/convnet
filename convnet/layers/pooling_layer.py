@@ -31,7 +31,7 @@ class _PoolingLayer(_BaseLayer):
         """
         super(_PoolingLayer, self).__init__(settings, net_settings)
         self.max_indices = np.zeros(self.settings.out_shape, dtype=(int, 2))
-        self._prev_delta_reuse = np.empty(self.settings.in_shape)
+        self._prev_delta_reuse = None
 
     def forward(self, data):
 
@@ -58,7 +58,7 @@ class _PoolingLayer(_BaseLayer):
     def _compute_prev_layer_delta(self, current_layer_delta):
         delta = current_layer_delta
 
-        res = self._prev_delta_reuse
+        res = np.zeros(self.settings.in_shape)
 
         f = self.settings.filter_size
         for z in xrange(0, delta.shape[2]):

@@ -29,14 +29,16 @@ class ReluLayerTest(unittest.TestCase):
         arr = np.random.uniform(-5, 5, 48).reshape((4, 4, 3))
         s = ReluLayerSettings(in_shape=arr.shape, activation='max')
         l = _ReluLayer(s)
+        l.next_layer = object()
 
         e = np.random.uniform(-5, 5, 48).reshape(*s.out_shape)
-        res = l.backward(e)
-
         print(e[:, :, 0])
         print(e[:, :, 1])
         print(e[:, :, 2])
         print('-----------')
+
+        res = l.backward(e)
+
         print(res[:, :, 0])
         print(res[:, :, 1])
         print(res[:, :, 2])

@@ -26,6 +26,28 @@ class BaseHandler(tornado.web.RequestHandler):
                 self.set_status(400)
                 self.finish("JSON is malformed")
 
+
+
+    def get_arg(self, field, default=None, field_type=None):
+        args = self.request.body_json
+        if args is None:
+            args = self.request.body
+        if field in args:
+            value = args[field]
+            if field_type is not None:
+                return field_type(value)
+            else:
+                return value
+
+        if field_type is not None:
+            return field_type(default)
+        return default
+
+    def require_arg(self, field, field_type=None):
+        arg = self.get_arg(field, field_type=field_type)
+        if arg is None:
+            raise
+
     def write_json(self, data):
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps(data, ensure_ascii=False))

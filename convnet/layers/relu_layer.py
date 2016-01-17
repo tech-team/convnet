@@ -43,6 +43,7 @@ class _ReluLayer(_BaseLayer):
         :type settings: ReluLayerSettings
         """
         super(_ReluLayer, self).__init__(settings, net_settings)
+        self._prev_delta_reuse = None
 
     def forward(self, data):
         self.prev_out = self.activation(data)
