@@ -33,7 +33,7 @@ class ConvNetTest(unittest.TestCase):
 
         net.fit(X, y)
 
-    def test_crossings(self):
+    def _test_crossings(self):
         X = to_3d([
             np.asarray([
                 [1, 0, 0],
@@ -63,7 +63,7 @@ class ConvNetTest(unittest.TestCase):
             np.asarray([0, 1]),
         ]
 
-        net = ConvNet(iterations_count=1000, learning_rate=0.01)
+        net = ConvNet(iterations_count=1000, learning_rate=0.001)
         net.setup_layers([
             InputLayer(InputLayerSettings(in_shape=X[0].shape)),
             ConvolutionalLayer(ConvolutionalLayerSettings(filter_size=3, filters_count=2, stride=1)),
@@ -93,7 +93,7 @@ class ConvNetTest(unittest.TestCase):
             Y.append(y_1d_to_3d(y_arr))
         return Y
 
-    def _test_mnist(self):
+    def test_mnist(self):
         script_path = os.path.dirname(os.path.abspath(__file__))
         f = gzip.open(os.path.join(script_path, '../mnist/mnist.pkl.gz'), 'rb')
         train_set, valid_set, test_set = cPickle.load(f)
@@ -103,19 +103,26 @@ class ConvNetTest(unittest.TestCase):
         X_train = self.transform_X(X_train)
         Y_train = self.transform_Y(Y_train)
 
-        net = ConvNet(iterations_count=1)
+        net = ConvNet(iterations_count=10, batch_size=10, learning_rate=0.01, momentum=0.9)
         net.setup_layers([
             InputLayer(InputLayerSettings(in_shape=X_train[0].shape)),
-            ConvolutionalLayer(ConvolutionalLayerSettings(filter_size=5, filters_count=12, stride=1, zero_padding=0)),
-            # ReluLayer(ReluLayerSettings(activation='max')),
-            PoolingLayer(PoolingLayerSettings(filter_size=2, stride=1)),
+
+            ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=8, filter_size=5, stride=1, zero_padding=0)),
+            ReluLayer(ReluLayerSettings(activation='max')),
+            PoolingLayer(PoolingLayerSettings(filter_size=2, stride=2)),
+
+            ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=16, filter_size=5, stride=1, zero_padding=0)),
+            ReluLayer(ReluLayerSettings(activation='max')),
+            PoolingLayer(PoolingLayerSettings(filter_size=3, stride=3)),
+
             FullConnectedLayer(FullConnectedLayerSettings(neurons_count=Y_train[0].shape[-1])),
             ReluLayer(ReluLayerSettings(activation='sigmoid')),
         ])
 
-        net.fit(X_train[:10], Y_train[:10])
+        examples_count = 20
+        net.fit(X_train[:examples_count], Y_train[:examples_count])
 
-        for x, y in zip(X_train[:10], Y_train[:10]):
+        for x, y in zip(X_train[:examples_count], Y_train[:examples_count]):
             h = net.predict(x)
             print("predicted = {}; \nreal = {}\n\n".format(h, y))
         pass

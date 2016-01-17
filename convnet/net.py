@@ -6,15 +6,19 @@ class ConvNetSettings(object):
         super(ConvNetSettings, self).__init__()
         self.iterations_count = None
         self.learning_rate = None
+        self.momentum = None
+        self.batch_size = None
 
 
 class ConvNet(object):
-    def __init__(self, iterations_count=10, learning_rate=0.01):
+    def __init__(self, iterations_count=10, learning_rate=0.01, momentum=0, batch_size=1):
         super(ConvNet, self).__init__()
 
         self.net_settings = ConvNetSettings()
         self.net_settings.iterations_count = iterations_count
         self.net_settings.learning_rate = learning_rate
+        self.net_settings.momentum = momentum
+        self.net_settings.batch_size = batch_size
 
         self.last_output = None
         self.layers = []
@@ -34,10 +38,14 @@ class ConvNet(object):
 
         # Step 3. Initialize prev_layer and next_layer in each layer
         for i in xrange(0, len(layers)):
+            prev_layer = None
+            next_layer = None
             if i != 0:
-                layers[i].prev_layer = layers[i - 1]
+                prev_layer = layers[i - 1]
             if i != len(layers) - 1:
-                layers[i].next_layer = layers[i + 1]
+                next_layer = layers[i + 1]
+
+            layers[i].setup_layers(prev_layer, next_layer)
 
         self.layers = layers
 
@@ -46,8 +54,12 @@ class ConvNet(object):
 
         for iteration in xrange(1, self.net_settings.iterations_count + 1):
             print("Iteration #{}".format(iteration))
+
+            samples_batch = 0
             for i, (x, y) in enumerate(zip(X, Y)):
                 print("{}/{}".format(i + 1, len(X)))
+                samples_batch += 1
+
                 res = x
                 for l in self.layers:
                     res = l.forward(res)
@@ -57,8 +69,14 @@ class ConvNet(object):
                 for l in reversed(self.layers):
                     res = l.backward(res)
 
+                if samples_batch == self.net_settings.batch_size:
+                    samples_batch = 0
+                    for l in self.layers:
+                        l.update_weights(samples_count=samples_batch)
+
+            if samples_batch != 0:
                 for l in self.layers:
-                    l.update_weights(samples_count=1)
+                    l.update_weights(samples_count=samples_batch)
 
     def predict(self, X):
         res = X

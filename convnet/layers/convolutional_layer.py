@@ -49,10 +49,14 @@ class _ConvolutionalLayer(_BaseLayer):
 
         f = settings.filter_size
         self.w = [np.zeros((f, f, settings.in_depth)) for _ in xrange(settings.filters_count)]
-        self.dw = [np.zeros((f, f, settings.in_depth)) for _ in xrange(settings.filters_count)]
+        self.dw = [np.zeros((f, f, settings.in_depth)) for _ in xrange(len(self.w))]
+        self.dw_last = [np.zeros((f, f, settings.in_depth)) for _ in xrange(len(self.dw))]
 
         self.b = [0] * settings.filters_count
-        self.db = [0] * settings.filters_count
+        self.db = [0] * len(self.b)
+        self.db_last = [0] * len(self.db)
+
+        assert len(self.w) == len(self.b)
 
     def _forward(self, data):
         assert data.shape == self.settings.in_shape, \
@@ -87,11 +91,9 @@ class _ConvolutionalLayer(_BaseLayer):
 
         s = self.settings.stride
 
-        res = np.empty(self.settings.out_shape)
-
-        for f in xrange(res.shape[2]):
-            for y in xrange(res.shape[1]):
-                for x in xrange(res.shape[0]):
+        for f in xrange(self.prev_out.shape[2]):
+            for y in xrange(self.prev_out.shape[1]):
+                for x in xrange(self.prev_out.shape[0]):
 
                     conv = 0.0
                     for i in xrange(0, self.settings.filter_size):
@@ -99,10 +101,9 @@ class _ConvolutionalLayer(_BaseLayer):
                             for z in xrange(0, self.settings.in_depth):
                                 conv += padded_data[s * x + i, s * y + j, z] * self.w[f][i, j, z]
 
-                    res[x, y, f] = self.b[f] + conv
+                    self.prev_out[x, y, f] = self.b[f] + conv
 
-        self.prev_out = res
-        return res
+        return self.prev_out
 
     def backward(self, current_layer_delta):
         if self.is_output:
@@ -135,18 +136,22 @@ class _ConvolutionalLayer(_BaseLayer):
         return prev_layer_delta
 
     def update_weights(self, samples_count=None):
-        for f in xrange(len(self.w)):
-            if samples_count:
+        filters_count = len(self.w)
+        learn_rate = self.net_settings.learning_rate
+        momentum = self.net_settings.momentum
+
+        for f in xrange(filters_count):
+            if samples_count and samples_count != 1:
                 self.dw[f] /= samples_count
-
-            self.w[f] -= self.net_settings.learning_rate * self.dw[f]
-            self.dw[f] = np.zeros(self.dw[f].shape)
-
-        for f in xrange(len(self.b)):
-            if samples_count:
                 self.db[f] /= samples_count
 
-            self.b[f] -= self.net_settings.learning_rate * self.db[f]
+            self.dw_last[f] = -learn_rate * self.dw[f] + momentum * self.dw_last[f]
+            self.db_last[f] = -learn_rate * self.db[f] + momentum * self.db_last[f]
+
+            self.w[f] += self.dw_last[f]
+            self.b[f] += self.db_last[f]
+
+            self.dw[f] = np.zeros(self.dw[f].shape)
             self.db[f] = 0
 
 

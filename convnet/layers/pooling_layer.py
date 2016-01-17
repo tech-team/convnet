@@ -31,9 +31,9 @@ class _PoolingLayer(_BaseLayer):
         """
         super(_PoolingLayer, self).__init__(settings, net_settings)
         self.max_indices = np.zeros(self.settings.out_shape, dtype=(int, 2))
+        self._prev_delta_reuse = np.empty(self.settings.in_shape)
 
     def forward(self, data):
-        res = np.empty(self.settings.out_shape)
 
         f = self.settings.filter_size
         for z in xrange(0, self.settings.out_depth):
@@ -48,18 +48,17 @@ class _PoolingLayer(_BaseLayer):
 
                     piece = data_slice[x_offset:x_offset + f, y_offset:y_offset + f]
                     max_index = np.unravel_index(piece.argmax(), piece.shape)
-                    res[i, j, z] = piece[max_index]
+                    self.prev_out[i, j, z] = piece[max_index]
                     self.max_indices[i, j, z] = tuple(max_index)
                     i += 1
                 j += 1
 
-        self.prev_out = res
-        return res
+        return self.prev_out
 
     def _compute_prev_layer_delta(self, current_layer_delta):
         delta = current_layer_delta
 
-        res = np.zeros(self.settings.in_shape)
+        res = self._prev_delta_reuse
 
         f = self.settings.filter_size
         for z in xrange(0, delta.shape[2]):

@@ -24,6 +24,7 @@ class ReluLayerSettings(BaseLayerSettings):
         return self.in_depth
 
 
+# noinspection PyCallingNonCallable
 class _ReluLayer(_BaseLayer):
     ACTIVATIONS = {
         'max': {
@@ -50,8 +51,8 @@ class _ReluLayer(_BaseLayer):
     def _compute_prev_layer_delta(self, current_layer_delta):
         shape = current_layer_delta.shape
         values = current_layer_delta.reshape(-1)
-        res = values * self.derivative(values)
-        return res.reshape(shape)
+        values *= self.derivative(values)
+        return values.reshape(shape)
 
     def backward(self, current_layer_delta):
         if self.is_output:

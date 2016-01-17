@@ -75,7 +75,9 @@ class _BaseLayer(object):
         self.net_settings = net_settings
         self.prev_layer = None
         self.next_layer = None
-        self.prev_out = None
+
+        self.prev_out = np.empty(self.settings.out_shape)
+        self._prev_delta_reuse = None
 
     def setup_layers(self, prev_layer, next_layer=None):
         """
@@ -84,6 +86,9 @@ class _BaseLayer(object):
         """
         self.prev_layer = prev_layer
         self.next_layer = next_layer
+
+        if self.prev_layer is not None:
+            self._prev_delta_reuse = np.empty(self.prev_layer.settings.out_shape)
 
     @property
     def is_input(self):
@@ -113,16 +118,18 @@ class _BaseLayer(object):
         if self.prev_layer.is_input:
             return None
 
-        delta = np.empty(self.settings.out_shape)
+        delta = self._prev_delta_reuse
         for z in xrange(delta.shape[2]):
             for y in xrange(delta.shape[1]):
                 for x in xrange(delta.shape[0]):
                     conv = 0.0
                     for i in xrange(0, current_layer_delta.shape[0]):
                         for j in xrange(0, current_layer_delta.shape[1]):
-                            for f in xrange(0, current_layer_delta.shape[2]):
-                                conv += current_layer_delta[i, j, f] * self.w[f][x - i, y - j, z]
-                    delta[x, y, z] += conv
+                            w_shape = self.w[0].shape
+                            if 0 <= x - i < w_shape[0] and 0 <= y - j < w_shape[1]:
+                                for f in xrange(0, current_layer_delta.shape[2]):
+                                    conv += current_layer_delta[i, j, f] * self.w[f][x - i, y - j, z]
+                    delta[x, y, z] = conv
         return delta
 
     @abc.abstractmethod
