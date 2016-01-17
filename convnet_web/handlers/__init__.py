@@ -1,2 +1,2 @@
-from main_handler import *
+from pages import *
 from api import *

@@ -18,14 +18,21 @@ class ConvNet(object):
         super(ConvNet, self).__init__()
 
         self.net_settings = ConvNetSettings()
-        self.net_settings.iterations_count = iterations_count
-        self.net_settings.learning_rate = learning_rate
-        self.net_settings.momentum = momentum
-        self.net_settings.batch_size = batch_size
-        self.net_settings.weight_decay = weight_decay
+        self.set_settings(iterations_count=iterations_count,
+                          learning_rate=learning_rate,
+                          momentum=momentum,
+                          batch_size=batch_size,
+                          weight_decay=weight_decay)
 
         self.last_output = None
         self.layers = []
+
+    def set_settings(self, **settings):
+        self.net_settings.iterations_count = settings['iterations_count']
+        self.net_settings.learning_rate = settings['learning_rate']
+        self.net_settings.momentum = settings['momentum']
+        self.net_settings.batch_size = settings['batch_size']
+        self.net_settings.weight_decay = settings['weight_decay']
 
     def setup_layers(self, layers):
         assert isinstance(layers, list), "Only list of layers is allowed"

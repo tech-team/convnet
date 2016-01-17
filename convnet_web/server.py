@@ -6,9 +6,13 @@ import tornado.options
 
 import convnet_web.handlers
 import settings
+from convnet.net import ConvNet
+
+net = ConvNet()
 
 
 def make_app():
+    global net
     s = {
         'debug': settings.DEBUG,
         'template_path': settings.TEMPLATES_DIR,
@@ -17,9 +21,13 @@ def make_app():
     }
 
     return tornado.web.Application([
-        (r"/", convnet_web.handlers.MainHandler),
-        (r"/api/config", convnet_web.handlers.ApiConfig),
+        (r"/", convnet_web.handlers.VisualHandler),
+        (r"/config", convnet_web.handlers.ConfigHandler),
+
+        (r"/api/config", convnet_web.handlers.ApiConfig, dict(net=net)),
+        (r"/api/predict", convnet_web.handlers.ApiPredict, dict(net=net)),
     ], **s)
+
 
 if __name__ == "__main__":
     logging.basicConfig(format='[%(asctime)s] %(levelname)s: %(message)s', level=logging.INFO)
