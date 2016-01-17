@@ -30,6 +30,11 @@ footer {
     width: 100%;
 }
 
+/*visual*/
+#image-input {
+    border: inset black thick;
+}
+
 /*config*/
 .key-cell {
     width: 25%;

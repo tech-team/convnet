@@ -10,7 +10,21 @@
 {% end %}
 
 {% block content %}
-<section id="visual-page">
-    <canvas id="display" width="600" height="600"></canvas>
+<section id="visual-page" class="row">
+    <section class="col-md-10">
+        <canvas id="display" width="600" height="600"></canvas>
+    </section>
+    <section class="col-md-2">
+        <section class="training">
+            <button class="btn btn-default configure">Configure</button>
+            <button class="btn btn-default train">Train</button>
+        </section>
+        <hr>
+        <section class="recognition">
+            <canvas id="image-input" width="168" height="168"></canvas>
+            <button class="btn btn-success recognize">Recognize</button>
+            <button class="btn btn-success clear">Clear</button>
+        </section>
+    </section>
 </section>
 {% end %}

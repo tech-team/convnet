@@ -5,14 +5,22 @@ define([
     'jquery-ui',
     'handlebars',
     'pages/ConfigPage',
-    'pages/VisualPage',
+    'pages/VisualPage'
 ], function($, jui, Handlebars,  ConfigPage, VisualPage) {
     registerHelpers();
 
-    // TODO: add Router here
-
-    visual();
-
+    switch(window.location.pathname) {
+        case '/':
+        case '/index':
+        case '/main':
+            visual();
+            break;
+        case '/config':
+            config();
+            break;
+        default:
+            alert('We are lost in space: ' + window.location.pathname);
+    }
 
     function visual() {
         var page = new VisualPage();
@@ -35,7 +43,7 @@ define([
             layers.push(layer);
         }
 
-        page.draw(layers, 28, 28);
+        page.display.display(layers, 48, 48);
     }
 
     function config() {
