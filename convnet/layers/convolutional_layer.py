@@ -1,6 +1,7 @@
 import numpy as np
 
 from convnet import utils
+from convnet.convnet_error import ConvNetError
 from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings, BaseLayer
 
 
@@ -28,15 +29,16 @@ class ConvolutionalLayerSettings(BaseLayerSettings):
     def check(self):
         super(ConvolutionalLayerSettings, self).check()
 
-        assert self.filter_size is not None, "Filter size is not allowed to be None"
+        if self.filter_size is None:
+            raise ConvNetError("Filter size is not allowed to be None")
 
         out_width = (self.in_width - self.filter_size + 2.0 * self.zero_padding) / self.stride + 1
-        assert out_width % 1 == 0, \
-            "out_width == {}, but should be integer".format(out_width)
+        if out_width % 1 != 0:
+            raise ConvNetError("out_width == {}, but should be integer".format(out_width))
 
         out_height = (self.in_height - self.filter_size + 2.0 * self.zero_padding) / self.stride + 1
-        assert out_height % 1 == 0, \
-            "out_width == {}, but should be integer".format(out_height)
+        if out_height % 1 != 0:
+            raise ConvNetError("out_height == {}, but should be integer".format(out_width))
 
 
 class _ConvolutionalLayer(_BaseLayer):

@@ -2,6 +2,8 @@ import abc
 
 import numpy as np
 
+from convnet.convnet_error import ConvNetError
+
 
 class BaseLayerSettings(object):
     def __init__(self, in_shape=None):
@@ -53,8 +55,10 @@ class BaseLayerSettings(object):
         pass
 
     def check(self):
-        assert len(self.in_shape) == 3, "Only 3-dimensional layers are allowed"
-        assert self.in_shape[0] == self.in_shape[1], "input's width and height have to be the same"
+        if len(self.in_shape) != 3:
+            raise ConvNetError("Only 3-dimensional layers are allowed")
+        if self.in_shape[0] != self.in_shape[1]:
+            raise ConvNetError("input's width and height have to be the same")
 
     def in_shape_changed(self):
         pass
@@ -112,7 +116,7 @@ class _BaseLayer(object):
         :type current_layer_delta: np.ndarray
         """
         if not hasattr(self, 'w'):
-            raise StandardError(
+            raise ConvNetError(
                 "Current layer has no weights matrix, should define custom _compute_prev_layer_delta function")
 
         if self.prev_layer.is_input:

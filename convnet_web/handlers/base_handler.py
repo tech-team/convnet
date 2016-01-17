@@ -27,10 +27,11 @@ class BaseHandler(tornado.web.RequestHandler):
                 self.set_status(400)
                 self.finish("JSON is malformed")
 
-    def get_arg(self, field, default=None, field_type=None):
-        args = self.request.body_json
+    def get_arg(self, field, default=None, field_type=None, args=None):
         if args is None:
-            args = self.request.body
+            args = self.request.body_json
+            if args is None:
+                args = self.request.body
 
         field_chain = field.split('.')
         target_args = args
@@ -44,21 +45,28 @@ class BaseHandler(tornado.web.RequestHandler):
                     continue
                 else:
                     raise tornado.web.MissingArgumentError('.'.join(field_chain[:i + 1]))
-        if target_field in target_args:
-            value = target_args[target_field]
+
+        try:
+            if target_field in target_args:
+                value = target_args[target_field]
+                if field_type is not None:
+                    return field_type(value)
+                else:
+                    return value
+
             if field_type is not None:
-                return field_type(value)
-            else:
-                return value
+                return default
+            return default
+        except TypeError:
+            raise tornado.web.HTTPError(status_code=400,
+                                        log_message="Incorrect type for field {}. Expected {}".format(target_field,
+                                                                                                      field_type))
 
-        if field_type is not None:
-            return field_type(default)
-        return default
-
-    def require_arg(self, field, field_type=None):
-        arg = self.get_arg(field, field_type=field_type)
+    def require_arg(self, field, field_type=None, args=None):
+        arg = self.get_arg(field, field_type=field_type, args=args)
         if arg is None:
             raise tornado.web.MissingArgumentError(field)
+        return arg
 
     def write_json(self, data):
         self.set_header("Content-Type", "application/json")
@@ -69,4 +77,3 @@ class BaseHandler(tornado.web.RequestHandler):
             if k not in kwargs:
                 kwargs[k] = v
         return super(BaseHandler, self).render(template_name, **kwargs)
-

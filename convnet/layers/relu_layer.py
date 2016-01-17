@@ -1,5 +1,6 @@
 import numpy as np
 
+from convnet.convnet_error import ConvNetError
 from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings, BaseLayer
 
 
@@ -10,6 +11,8 @@ class ReluLayerSettings(BaseLayerSettings):
     def __init__(self, in_shape=None, activation='max'):
         super(ReluLayerSettings, self).__init__(in_shape=in_shape)
         self.activation = activation
+        if self.activation not in _ReluLayer.ACTIVATIONS:
+            raise ConvNetError("Unknown activation function")
 
     @property
     def out_width(self):

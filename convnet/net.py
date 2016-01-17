@@ -1,3 +1,5 @@
+import cPickle
+
 from convnet.layers.base_layer import _BaseLayer, BaseLayer
 
 
@@ -85,3 +87,13 @@ class ConvNet(object):
 
         self.last_output = res
         return res
+
+    def dump_net(self, filename='convnet.pkl'):
+        with open(filename, 'wb') as f:
+            cPickle.dump(self, f)
+
+    @staticmethod
+    def load_net(filename='convnet.pkl'):
+        with open(filename, 'rb') as f:
+            net = cPickle.load(f)
+        return net
