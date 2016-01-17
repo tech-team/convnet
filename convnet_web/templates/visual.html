@@ -16,14 +16,21 @@
     </section>
     <section class="col-md-2">
         <section class="training">
+            <h3>Training:</h3>
+            <progress class="progress" max="100" value="0"></progress>
             <button class="btn btn-default configure">Configure</button>
             <button class="btn btn-default train">Train</button>
         </section>
         <hr>
         <section class="recognition">
+            <h3>Recognition:</h3>
             <canvas id="image-input" width="168" height="168"></canvas>
             <button class="btn btn-success recognize">Recognize</button>
             <button class="btn btn-success clear">Clear</button>
+            <br><br>
+            <section class="well">
+                <h4><b>Result: <span class="result">-</span></b></h4>
+            </section>
         </section>
     </section>
 </section>

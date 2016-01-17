@@ -3,8 +3,9 @@
 define([
     'jquery',
     'jquery-ui',
-    'util/Templater'
-], function($, jui, Templater) {
+    'util/Templater',
+    'api/Client'
+], function($, jui, Templater, Client) {
     class VisualPage {
         constructor() {
             this.$el = $('#visual-page');
@@ -12,14 +13,58 @@ define([
             this.display = new Display(this.$el.find('#display'));
             this.imageInput = new ImageInput(this.$el.find('#image-input'));
 
+            this.$progress = this.$el.find('.progress');
             this.$configure = this.$el.find('.configure');
             this.$train = this.$el.find('.train');
             this.$recognize = this.$el.find('.recognize');
             this.$clear = this.$el.find('.clear');
+            this.$result = this.$el.find('.result');
 
+            this.$configure.click(() => this.configure());
+            this.$train.click(() => this.train());
+            this.$recognize.click(() => this.recognize());
             this.$clear.click(() => this.imageInput.clear());
         }
 
+        train() {
+            Client.train((error, data) => {
+                if (error)
+                    return this.onError(error);
+
+                this.pollProgress();
+            });
+        }
+
+        pollProgress() {
+            Client.getTrainProgress((error, data) => {
+                if (error)
+                    return this.onError(error);
+
+                this.$progress.val(data.progress);
+                console.log('Progress: ' + data.progress);
+
+                setTimeout(() => this.pollProgress(), 1000);
+            });
+        }
+
+        recognize() {
+            Client.train((error, data) => {
+                if (error)
+                    return this.onError(error);
+
+                this.$result.text(data.value);
+            });
+        }
+
+        configure() {
+            // navigate
+            window.location.href = '/config';
+        }
+
+        onError(error) {
+            console.log(error);
+            alert(JSON.stringify(error));
+        }
     }
 
     class Display {
