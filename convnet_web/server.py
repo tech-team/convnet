@@ -18,6 +18,7 @@ def make_app():
 
     return tornado.web.Application([
         (r"/", convnet_web.handlers.MainHandler),
+        (r"/api/config", convnet_web.handlers.ApiConfig),
     ], **s)
 
 if __name__ == "__main__":

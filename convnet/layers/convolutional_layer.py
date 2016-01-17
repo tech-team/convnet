@@ -40,6 +40,9 @@ class ConvolutionalLayerSettings(BaseLayerSettings):
 
 
 class _ConvolutionalLayer(_BaseLayer):
+
+    EPSILON = 0.3
+
     def __init__(self, settings, net_settings=None):
         """
         :param settings: Convolutional layer settings
@@ -48,11 +51,17 @@ class _ConvolutionalLayer(_BaseLayer):
         super(_ConvolutionalLayer, self).__init__(settings, net_settings)
 
         f = settings.filter_size
-        self.w = [np.zeros((f, f, settings.in_depth)) for _ in xrange(settings.filters_count)]
-        self.dw = [np.zeros((f, f, settings.in_depth)) for _ in xrange(len(self.w))]
-        self.dw_last = [np.zeros((f, f, settings.in_depth)) for _ in xrange(len(self.dw))]
+        w_shape = (f, f, settings.in_depth)
 
-        self.b = [0] * settings.filters_count
+        def new_w(shape):
+            return np.random.uniform(low=-self.EPSILON, high=self.EPSILON, size=(np.prod(np.asarray(shape)),))\
+                            .reshape(shape)
+
+        self.w = [new_w(w_shape) for _ in xrange(settings.filters_count)]
+        self.dw = [np.zeros(w_shape) for _ in xrange(len(self.w))]
+        self.dw_last = [np.zeros(w_shape) for _ in xrange(len(self.dw))]
+
+        self.b = [new_w((1,))[0] for _ in xrange(settings.filters_count)]
         self.db = [0] * len(self.b)
         self.db_last = [0] * len(self.db)
 

@@ -103,7 +103,7 @@ class ConvNetTest(unittest.TestCase):
         X_train = self.transform_X(X_train)
         Y_train = self.transform_Y(Y_train)
 
-        net = ConvNet(iterations_count=10, batch_size=10, learning_rate=0.01, momentum=0.9)
+        net = ConvNet(iterations_count=5, batch_size=10, learning_rate=0.01, momentum=0.9)
         net.setup_layers([
             InputLayer(InputLayerSettings(in_shape=X_train[0].shape)),
 
