@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-PYTHONPATH=.:../.. python mnist.py > mnist.log 2>&1
+PYTHONPATH=.:../.. python -u mnist.py 2>&1 | tee convnet.log
