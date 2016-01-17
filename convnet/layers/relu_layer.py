@@ -52,7 +52,7 @@ class _ReluLayer(_BaseLayer):
     def _compute_prev_layer_delta(self, current_layer_delta):
         shape = current_layer_delta.shape
         values = current_layer_delta.reshape(-1)
-        values *= self.derivative(values)
+        values *= self.derivative(self.prev_layer.prev_out.reshape(-1))
         return values.reshape(shape)
 
     def backward(self, current_layer_delta):
