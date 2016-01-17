@@ -143,21 +143,22 @@ class _ConvolutionalLayer(_BaseLayer):
             self.db[f] += conv
 
         # calc delta
-        prev_layer_delta = self._compute_prev_layer_delta(current_layer_delta)
+        prev_layer_delta = self.compute_prev_layer_delta(current_layer_delta)
         return prev_layer_delta
 
     def update_weights(self, samples_count=None):
         filters_count = len(self.w)
         learn_rate = self.net_settings.learning_rate
         momentum = self.net_settings.momentum
+        weight_decay = self.net_settings.weight_decay
 
         for f in xrange(filters_count):
             if samples_count and samples_count != 1:
                 self.dw[f] /= samples_count
                 self.db[f] /= samples_count
 
-            self.dw_last[f] = -learn_rate * self.dw[f] + momentum * self.dw_last[f]
-            self.db_last[f] = -learn_rate * self.db[f] + momentum * self.db_last[f]
+            self.dw_last[f] = -learn_rate * (self.dw[f] + weight_decay * self.w[f]) + momentum * self.dw_last[f]
+            self.db_last[f] = -learn_rate * (self.db[f]) + momentum * self.db_last[f]
 
             self.w[f] += self.dw_last[f]
             self.b[f] += self.db_last[f]

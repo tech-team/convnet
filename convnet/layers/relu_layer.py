@@ -4,6 +4,18 @@ from convnet.convnet_error import ConvNetError
 from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings, BaseLayer
 
 
+def relu_softmax(x):
+    e = np.exp(x - np.max(x))
+    return e / e.sum()
+
+
+def relu_softmax_deriv(x):
+    exps = np.exp(x)
+    others = exps.sum() - exps
+    return 1 / (2 + exps / others + others / exps)
+
+
+
 class ReluLayerSettings(BaseLayerSettings):
     """
     activation - string, containing a name of desired activation func (refer to ReluLayer.ACTIVATIONS
@@ -38,6 +50,10 @@ class _ReluLayer(_BaseLayer):
             'f': lambda x: 1.0 / (1 + np.exp(-1.0 * x)),
             'df': lambda x: _ReluLayer.ACTIVATIONS['sigmoid']['f'](x) * (1 - _ReluLayer.ACTIVATIONS['sigmoid']['f'](x)),
         },
+        'softmax': {
+            'f': relu_softmax,
+            'df': relu_softmax_deriv,
+        },
     }
 
     def __init__(self, settings, net_settings=None):
@@ -52,7 +68,7 @@ class _ReluLayer(_BaseLayer):
         self.prev_out = self.activation(data)
         return self.prev_out
 
-    def _compute_prev_layer_delta(self, current_layer_delta):
+    def compute_prev_layer_delta(self, current_layer_delta):
         shape = current_layer_delta.shape
         values = current_layer_delta.reshape(-1)
         values *= self.derivative(self.prev_layer.prev_out.reshape(-1))
@@ -61,7 +77,7 @@ class _ReluLayer(_BaseLayer):
     def backward(self, current_layer_delta):
         if self.is_output:
             current_layer_delta = self.prev_out - current_layer_delta
-        return self._compute_prev_layer_delta(current_layer_delta)
+        return self.compute_prev_layer_delta(current_layer_delta)
 
     def activation(self, x):
         return self.ACTIVATIONS[self.settings.activation]['f'](x)

@@ -142,23 +142,20 @@ class ConvNetTest(unittest.TestCase):
         X_train = self.transform_X(X_train)
         Y_train = self.transform_Y(Y_train)
 
-        net = ConvNet(iterations_count=10, batch_size=10, learning_rate=0.01, momentum=0.9)
+        net = ConvNet(iterations_count=10, batch_size=10, learning_rate=0.001, momentum=0.8, weight_decay=0.001)
         net.setup_layers([
             InputLayer(InputLayerSettings(in_shape=X_train[0].shape)),
 
-            # ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=8, filter_size=5, stride=1, zero_padding=0)),
-            # ReluLayer(ReluLayerSettings(activation='max')),
-            # PoolingLayer(PoolingLayerSettings(filter_size=2, stride=2)),
+            ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=8, filter_size=5, stride=1, zero_padding=0)),
+            ReluLayer(ReluLayerSettings(activation='max')),
+            PoolingLayer(PoolingLayerSettings(filter_size=2, stride=2)),
             #
             # ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=16, filter_size=5, stride=1, zero_padding=0)),
             # ReluLayer(ReluLayerSettings(activation='max')),
             # PoolingLayer(PoolingLayerSettings(filter_size=3, stride=3)),
 
-            FullConnectedLayer(FullConnectedLayerSettings(neurons_count=Y_train[0].shape[-1])),
-            ReluLayer(ReluLayerSettings(activation='sigmoid')),
-
-            FullConnectedLayer(FullConnectedLayerSettings(neurons_count=Y_train[0].shape[-1])),
-            ReluLayer(ReluLayerSettings(activation='sigmoid')),
+            FullConnectedLayer(FullConnectedLayerSettings(neurons_count=Y_train[0].shape[-1], activation='sigmoid')),
+            # ReluLayer(ReluLayerSettings(activation='sigmoid')),
         ])
 
         examples_count = 100000
@@ -170,7 +167,7 @@ class ConvNetTest(unittest.TestCase):
             h_res = h.argmax()
             y_res = y.argmax()
             print("predicted = {}; max = {}".format(h, h.argmax()))
-            print("real = {}; max = {}".format(y, y.argmax()))
+            print("real =      {}; max = {}".format(y, y.argmax()))
             print("\n")
             matched += int(h_res == y_res)
 

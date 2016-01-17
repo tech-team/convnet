@@ -10,10 +10,11 @@ class ConvNetSettings(object):
         self.learning_rate = None
         self.momentum = None
         self.batch_size = None
+        self.weight_decay = None
 
 
 class ConvNet(object):
-    def __init__(self, iterations_count=10, learning_rate=0.01, momentum=0, batch_size=1):
+    def __init__(self, iterations_count=10, learning_rate=0.01, momentum=0, batch_size=1, weight_decay=0):
         super(ConvNet, self).__init__()
 
         self.net_settings = ConvNetSettings()
@@ -21,6 +22,7 @@ class ConvNet(object):
         self.net_settings.learning_rate = learning_rate
         self.net_settings.momentum = momentum
         self.net_settings.batch_size = batch_size
+        self.net_settings.weight_decay = weight_decay
 
         self.last_output = None
         self.layers = []

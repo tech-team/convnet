@@ -110,7 +110,7 @@ class _BaseLayer(object):
         """
         pass
 
-    def _compute_prev_layer_delta(self, current_layer_delta):
+    def compute_prev_layer_delta(self, current_layer_delta):
         """
         :param current_layer_delta: Current layer's delta
         :type current_layer_delta: np.ndarray

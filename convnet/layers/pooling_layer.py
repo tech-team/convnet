@@ -55,7 +55,7 @@ class _PoolingLayer(_BaseLayer):
 
         return self.prev_out
 
-    def _compute_prev_layer_delta(self, current_layer_delta):
+    def compute_prev_layer_delta(self, current_layer_delta):
         delta = current_layer_delta
 
         res = np.zeros(self.settings.in_shape)
@@ -81,7 +81,7 @@ class _PoolingLayer(_BaseLayer):
     def backward(self, current_layer_delta):
         if self.is_output:
             current_layer_delta = self.prev_out - current_layer_delta
-        return self._compute_prev_layer_delta(current_layer_delta)
+        return self.compute_prev_layer_delta(current_layer_delta)
 
     def update_weights(self, samples_count=None):
         super(_PoolingLayer, self).update_weights(samples_count)
