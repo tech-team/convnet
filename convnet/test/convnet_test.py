@@ -137,7 +137,7 @@ class ConvNetTest(unittest.TestCase):
 
         X_train, Y_train = train_set
 
-        X_train, Y_train = self.get_examples(X_train, Y_train, labels=np.arange(0, 10), count=30)
+        X_train, Y_train = self.get_examples(X_train, Y_train, labels=np.arange(0, 4), count=10)
         X_train, Y_train = self.shuffle_in_unison_inplace(X_train, Y_train)
         X_train = self.transform_X(X_train)
         Y_train = self.transform_Y(Y_train)
@@ -146,13 +146,16 @@ class ConvNetTest(unittest.TestCase):
         net.setup_layers([
             InputLayer(InputLayerSettings(in_shape=X_train[0].shape)),
 
-            ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=8, filter_size=5, stride=1, zero_padding=0)),
-            ReluLayer(ReluLayerSettings(activation='max')),
-            PoolingLayer(PoolingLayerSettings(filter_size=2, stride=2)),
-
+            # ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=8, filter_size=5, stride=1, zero_padding=0)),
+            # ReluLayer(ReluLayerSettings(activation='max')),
+            # PoolingLayer(PoolingLayerSettings(filter_size=2, stride=2)),
+            #
             # ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=16, filter_size=5, stride=1, zero_padding=0)),
             # ReluLayer(ReluLayerSettings(activation='max')),
             # PoolingLayer(PoolingLayerSettings(filter_size=3, stride=3)),
+
+            FullConnectedLayer(FullConnectedLayerSettings(neurons_count=Y_train[0].shape[-1])),
+            ReluLayer(ReluLayerSettings(activation='sigmoid')),
 
             FullConnectedLayer(FullConnectedLayerSettings(neurons_count=Y_train[0].shape[-1])),
             ReluLayer(ReluLayerSettings(activation='sigmoid')),
@@ -161,7 +164,14 @@ class ConvNetTest(unittest.TestCase):
         examples_count = 100000
         net.fit(X_train[:examples_count], Y_train[:examples_count])
 
+        matched = 0
         for x, y in zip(X_train[:examples_count], Y_train[:examples_count]):
             h = net.predict(x)
-            print("predicted = {}; max = {} \nreal = {}; max = {}\n\n".format(h, h.argmax(), y, y.argmax()))
-        pass
+            h_res = h.argmax()
+            y_res = y.argmax()
+            print("predicted = {}; max = {}".format(h, h.argmax()))
+            print("real = {}; max = {}".format(y, y.argmax()))
+            print("\n")
+            matched += int(h_res == y_res)
+
+        print("Accuracy {}/{}".format(matched, len(X_train[:examples_count])))
