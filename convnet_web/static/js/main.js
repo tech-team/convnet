@@ -43,7 +43,7 @@ define([
             layers.push(layer);
         }
 
-        page.draw(layers, 28, 28);
+        page.display.display(layers, 48, 48);
     }
 
     function config() {

@@ -8,11 +8,27 @@ define([
     class VisualPage {
         constructor() {
             this.$el = $('#visual-page');
-            this.$canvas = this.$el.find('#display');
+
+            this.display = new Display(this.$el.find('#display'));
+            this.imageInput = new ImageInput(this.$el.find('#image-input'));
+
+            this.$configure = this.$el.find('.configure');
+            this.$train = this.$el.find('.train');
+            this.$recognize = this.$el.find('.recognize');
+            this.$clear = this.$el.find('.clear');
+
+            this.$clear.click(() => this.imageInput.clear());
+        }
+
+    }
+
+    class Display {
+        constructor($canvas) {
+            this.$canvas = $canvas;
             this.ctx = this.$canvas[0].getContext('2d');
         }
-        
-        draw(layers, desiredImgW, desiredImgH) {
+
+        display(layers, desiredImgW, desiredImgH) {
             let imgData = this.ctx.createImageData(this.ctx.canvas.width, this.ctx.canvas.height);
 
             for (let l = 0; l < layers.length; ++l) {
@@ -46,6 +62,72 @@ define([
             }
 
             this.ctx.putImageData(imgData, 0, 0);
+        }
+    }
+
+    class ImageInput {
+        constructor($canvas) {
+            this.$canvas = $canvas;
+            this.ctx = this.$canvas[0].getContext('2d');
+
+            this.clear();
+
+            $canvas.mousedown((e) => {
+                this.paint = true;
+                this.addClick(e.offsetX, e.offsetY);
+                this.redraw();
+            });
+
+            $canvas.mousemove((e) => {
+                if (this.paint) {
+                    this.addClick(e.offsetX, e.offsetY, true);
+                    this.redraw();
+                }
+            });
+
+            $canvas.mouseup((e) => this.paint = false);
+            $canvas.mouseleave((e) => this.paint = false);
+        }
+
+        redraw() {
+            var context = this.ctx;
+
+            context.clearRect(0, 0, context.canvas.width, context.canvas.height); // Clears the canvas
+
+            context.strokeStyle = "black";
+            context.lineJoin = "round";
+            context.lineWidth = 5;
+
+            for(var i = 0; i < this.clickX.length; ++i) {
+                context.beginPath();
+                if(this.clickDrag[i] && i) {
+                    context.moveTo(this.clickX[i - 1], this.clickY[i - 1]);
+                } else {
+                    context.moveTo(this.clickX[i] - 1, this.clickY[i]);
+                }
+                context.lineTo(this.clickX[i], this.clickY[i]);
+                context.closePath();
+                context.stroke();
+            }
+        }
+
+        clear() {
+            this.clickX = [];
+            this.clickY = [];
+            this.clickDrag = [];
+            this.paint = false;
+
+            this.redraw();
+        }
+
+        getDataURL() {
+            return this.ctx.canvas.toDataURL('image/png', 1);
+        }
+
+        addClick(x, y, dragging) {
+            this.clickX.push(x);
+            this.clickY.push(y);
+            this.clickDrag.push(dragging);
         }
     }
 
