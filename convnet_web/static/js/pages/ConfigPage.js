@@ -3,8 +3,9 @@
 define([
     'jquery',
     'jquery-ui',
-    'util/Templater'
-], function($, jui, Templater) {
+    'util/Templater',
+    'api/Client'
+], function($, jui, Templater, Client) {
     class ConfigPage {
         constructor() {
             this.$el = $('.config-page');
@@ -43,6 +44,14 @@ define([
 
                 // TODO: send to server
                 alert('Not implemented');
+            });
+
+            // retrieve config from server
+            Client.getConfig((error, data) => {
+                if (error)
+                    return this.onError(error);
+
+                this.render(data.config)
             });
         }
 
@@ -92,6 +101,23 @@ define([
 
             var $layerHtml = $(layerHtml);
             $layerHtml.appendTo(this.targets.layers);
+        }
+
+        save() {
+            var config = this.serialize();
+
+            Client.configure(config, (error, data) => {
+                if (error)
+                    return this.onError(error);
+
+                // navigate to main page
+                window.location.href = '/';
+            });
+        }
+
+        onError(error) {
+            console.log(error);
+            alert(JSON.stringify(error));
         }
     }
 
