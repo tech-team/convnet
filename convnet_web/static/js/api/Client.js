@@ -71,6 +71,25 @@ define([
                 });
             }
 
+            load(cb) {
+                // TODO: ES6 style (get rid off slf and function)
+                var self = this;
+
+                cb = cb || _.noop();
+                self._post(Env.get('config_mnist'), {
+
+                }, {
+                    onError: (res) => cb(new RequestError(res)),
+                    onComplete: (res) => {
+                        if (res.status == "ok") {
+                            cb(null, res.data);
+                        } else {
+                            cb(new RequestError(res, true), null);
+                        }
+                    }
+                });
+            }
+
             getTrainProgress(cb) {
                 // TODO: ES6 style (get rid off slf and function)
                 var self = this;

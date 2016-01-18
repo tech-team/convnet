@@ -54,35 +54,28 @@ define([
                     learnRate: 0.01
                 },
                 layers: [{
-                    name: 'Layer',
-                    type: 'input',
-                    w: 5,
-                    h: 5,
-                    d: 3
-                }, {
-                    name: 'Layer',
-                    type: 'conv',
-                    w: 3,
-                    h: 3,
-                    d: 2
-                }, {
-                    name: 'Layer',
-                    type: 'relu',
-                    w: 3,
-                    h: 3,
-                    d: 2
-                }, {
-                    name: 'Layer',
-                    type: 'pool',
-                    w: 2,
-                    h: 2,
-                    d: 2
-                }, {
-                    name: 'Layer',
-                    type: 'full',
-                    w: 1,
-                    h: 1,
-                    d: 3
+                    "layers": [
+                        {
+                            "type": "conv",
+                            "filter_size": 5,
+                            "filters_count": 8,
+                            "stride": 1,
+                            "zero_padding": 0
+                        },
+                        {
+                            "type": "relu",
+                            "activation": "max"
+                        },
+                        {
+                            "type": "pool",
+                            "filter_size": 2,
+                            "stride": 1
+                        },
+                        {
+                            "type": "fc",
+                            "neurons_count": 10
+                        }
+                    ]
                 }]
             };
 

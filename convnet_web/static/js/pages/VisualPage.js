@@ -3,9 +3,10 @@
 define([
     'jquery',
     'jquery-ui',
+    'lodash',
     'util/Templater',
     'api/Client'
-], function($, jui, Templater, Client) {
+], function($, jui, _, Templater, Client) {
     class VisualPage {
         constructor() {
             this.$el = $('#visual-page');
@@ -16,12 +17,14 @@ define([
             this.$progress = this.$el.find('.progress');
             this.$configure = this.$el.find('.configure');
             this.$train = this.$el.find('.train');
+            this.$load = this.$el.find('.load');
             this.$recognize = this.$el.find('.recognize');
             this.$clear = this.$el.find('.clear');
             this.$result = this.$el.find('.result');
 
             this.$configure.click(() => this.configure());
             this.$train.click(() => this.train());
+            this.$load.click(() => this.load());
             this.$recognize.click(() => this.recognize());
             this.$clear.click(() => this.imageInput.clear());
         }
@@ -47,12 +50,28 @@ define([
             });
         }
 
-        recognize() {
-            Client.train((error, data) => {
+        load() {
+            Client.load((error, data) => {
                 if (error)
                     return this.onError(error);
 
-                this.$result.text(data.value);
+                alert('Loaded');
+            });
+        }
+
+        recognize() {
+            let image = this.imageInput.getImageMatrix();
+
+            Client.predict(image, (error, data) => {
+                if (error)
+                    return this.onError(error);
+
+                this.$result.fadeOut('fast', () => {
+                    this.$result.fadeIn('fast', () => {
+                        this.$result.text(data.prediction + '(' + data.confidence + ')');
+                        this.display.display(data.layers, 40, 40);
+                    });
+                });
             });
         }
 
@@ -141,7 +160,7 @@ define([
 
             context.strokeStyle = "black";
             context.lineJoin = "round";
-            context.lineWidth = 5;
+            context.lineWidth = 10;
 
             for(var i = 0; i < this.clickX.length; ++i) {
                 context.beginPath();
@@ -165,14 +184,52 @@ define([
             this.redraw();
         }
 
-        getDataURL() {
-            return this.ctx.canvas.toDataURL('image/png', 1);
-        }
-
         addClick(x, y, dragging) {
             this.clickX.push(x);
             this.clickY.push(y);
             this.clickDrag.push(dragging);
+        }
+
+        getImageMatrix() {
+            var m = [];
+
+            var origW = this.ctx.canvas.width;
+            var origH = this.ctx.canvas.height;
+            var data = this.ctx.getImageData(0, 0, origW, origH).data;
+
+            var scaleX = Math.floor(origW / 28);
+            var scaleY = Math.floor(origH / 28);
+            
+            var mX = origW / scaleX;
+            var mY = origH / scaleY;            
+
+            for (let j = 0; j < mY; ++j) {
+                let line = [];
+                for (let i = 0; i < mX; ++i) {
+                    let color = 0;
+                    
+                    // averaging
+                    for (let chunkY = 0; chunkY < scaleY; ++chunkY) {
+                        for (let chunkX = 0; chunkX < scaleX; ++chunkX) {
+                            let x = i * scaleX + chunkX;
+                            let y = j * scaleY + chunkY;
+                            let id = (y * origW + x) * 4 + 3;  // A channel value
+
+                            color += data[id] / 255;  //norm 0..1
+                        }
+                    }
+                    color = color / (scaleX * scaleY);  // average by chunk
+                    line.push(color);
+                }
+                m.push(line);
+                console.log(_.map(line, (el) => +(el > 0.5)));
+            }
+
+            return m;
+        }
+
+        getDataURL() {
+            return this.ctx.canvas.toDataURL('image/png', 1);
         }
     }
 
