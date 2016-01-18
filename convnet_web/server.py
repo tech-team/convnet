@@ -6,12 +6,27 @@ import tornado.options
 
 import convnet_web.handlers
 import settings as convsettings
+from convnet.layers import *
 from convnet.net import ConvNet
 
 
 class Application(tornado.web.Application):
     def __init__(self):
         self.net = ConvNet()
+        self.net.setup_layers([
+            InputLayer(InputLayerSettings(in_shape=(28, 28, 1))),
+
+            ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=8, filter_size=5, stride=1, zero_padding=0)),
+            ReluLayer(ReluLayerSettings(activation='max')),
+            PoolingLayer(PoolingLayerSettings(filter_size=2, stride=2)),
+
+            ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=16, filter_size=5, stride=1, zero_padding=0)),
+            ReluLayer(ReluLayerSettings(activation='max')),
+            PoolingLayer(PoolingLayerSettings(filter_size=3, stride=3)),
+
+            FullConnectedLayer(FullConnectedLayerSettings(neurons_count=10, activation='sigmoid')),
+        ])
+
         s = {
             'debug': convsettings.DEBUG,
             'template_path': convsettings.TEMPLATES_DIR,
