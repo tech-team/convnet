@@ -6,6 +6,8 @@ from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings, BaseLayer
 
 
 class ConvolutionalLayerSettings(BaseLayerSettings):
+    TYPE = 'conv'
+
     def __init__(self, in_shape=None, filters_count=1, filter_size=None, stride=1, zero_padding=None):
         super(ConvolutionalLayerSettings, self).__init__(in_shape=in_shape)
 
@@ -39,6 +41,16 @@ class ConvolutionalLayerSettings(BaseLayerSettings):
         out_height = (self.in_height - self.filter_size + 2.0 * self.zero_padding) / self.stride + 1
         if out_height % 1 != 0:
             raise ConvNetError("out_height == {}, but should be integer".format(out_width))
+
+    def to_dict(self):
+        d = super(ConvolutionalLayerSettings, self).to_dict()
+        d.update({
+            'filters_count': self.filters_count,
+            'filter_size': self.filter_size,
+            'stride': self.stride,
+            'zero_padding': self.zero_padding,
+        })
+        return d
 
 
 class _ConvolutionalLayer(_BaseLayer):

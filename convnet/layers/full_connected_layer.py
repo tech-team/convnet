@@ -1,11 +1,13 @@
 import numpy as np
 
-from convnet.layers.base_layer import BaseLayer
+from convnet.layers.base_layer import BaseLayer, BaseLayerSettings
 from convnet.layers.convolutional_layer import ConvolutionalLayerSettings, _ConvolutionalLayer
 from convnet.layers.relu_layer import _ReluLayer, ReluLayerSettings
 
 
 class FullConnectedLayerSettings(ConvolutionalLayerSettings):
+    TYPE = 'fc'
+
     def __init__(self, in_shape=None, neurons_count=1,activation='sigmoid'):
         super(FullConnectedLayerSettings, self).__init__(in_shape=in_shape,
                                                          filters_count=neurons_count,
@@ -17,6 +19,13 @@ class FullConnectedLayerSettings(ConvolutionalLayerSettings):
     def in_shape_changed(self):
         super(FullConnectedLayerSettings, self).in_shape_changed()
         self.filter_size = self.in_width
+
+    def to_dict(self):
+        d = BaseLayerSettings.to_dict(self)
+        d.update({
+            'activation': self.activation,
+        })
+        return d
 
 
 class _FullConnectedLayer(_ConvolutionalLayer):
@@ -39,6 +48,7 @@ class _FullConnectedLayer(_ConvolutionalLayer):
     def compute_prev_layer_delta(self, current_layer_delta):
         prev_delta = super(_FullConnectedLayer, self).compute_prev_layer_delta(current_layer_delta)
         return self.relu.compute_prev_layer_delta(prev_delta)
+
 
 
 class FullConnectedLayer(BaseLayer):

@@ -4,6 +4,8 @@ from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings, BaseLayer
 
 
 class PoolingLayerSettings(BaseLayerSettings):
+    TYPE = 'pool'
+
     def __init__(self, in_shape=None, filter_size=1, stride=1):
         super(PoolingLayerSettings, self).__init__(in_shape=in_shape)
 
@@ -21,6 +23,14 @@ class PoolingLayerSettings(BaseLayerSettings):
     @property
     def out_depth(self):
         return self.in_depth
+
+    def to_dict(self):
+        d = super(PoolingLayerSettings, self).to_dict()
+        d.update({
+            'filter_size': self.filter_size,
+            'stride': self.stride,
+        })
+        return d
 
 
 class _PoolingLayer(_BaseLayer):

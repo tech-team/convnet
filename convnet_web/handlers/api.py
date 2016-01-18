@@ -63,10 +63,14 @@ class ApiConfig(ApiHandler):
 
             self.net.setup_layers(layers)
 
-            return self.api_ok()
+            return self.api_ok(self.net.to_dict())
 
         except ConvNetError as e:
             return self.api_error(e.message)
+
+    def get(self):
+        d = self.net.to_dict()
+        self.api_ok(d)
 
     def _create_layer_from_conf(self, layer_conf):
         """
@@ -113,7 +117,7 @@ class ApiConfigMnist(ApiHandler):
         net = self.net.load_net(mnist_net_path)
         self.application.net.replace(net)
 
-        self.api_ok()
+        self.api_ok(self.application.net.to_dict())
 
 
 class ApiPredict(ApiHandler):

@@ -4,6 +4,8 @@ from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings, BaseLayer
 
 
 class InputLayerSettings(BaseLayerSettings):
+    TYPE = 'input'
+
     def __init__(self, in_shape):
         super(InputLayerSettings, self).__init__(in_shape=in_shape)
 
