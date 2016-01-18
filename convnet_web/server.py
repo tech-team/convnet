@@ -16,11 +16,11 @@ class Application(tornado.web.Application):
         self.net.setup_layers([
             InputLayer(InputLayerSettings(in_shape=(28, 28, 1))),
 
-            ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=8, filter_size=5, stride=1, zero_padding=0)),
+            ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=16, filter_size=5, stride=1, zero_padding=0)),
             ReluLayer(ReluLayerSettings(activation='max')),
             PoolingLayer(PoolingLayerSettings(filter_size=2, stride=2)),
 
-            ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=16, filter_size=5, stride=1, zero_padding=0)),
+            ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=8, filter_size=5, stride=1, zero_padding=0)),
             ReluLayer(ReluLayerSettings(activation='max')),
             PoolingLayer(PoolingLayerSettings(filter_size=3, stride=3)),
 

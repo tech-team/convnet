@@ -114,7 +114,7 @@ define([
                             var b = g + 1;
                             var a = b + 1;
 
-                            var color = line[Math.floor(x * upSampleX)];
+                            var color = line[Math.floor(x * upSampleX)] * 255;
 
                             imgData.data[r] = color;
                             imgData.data[g] = color;

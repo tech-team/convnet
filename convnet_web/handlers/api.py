@@ -112,8 +112,8 @@ class ApiConfig(ApiHandler):
 
 class ApiConfigMnist(ApiHandler):
     def post(self):
-        # mnist_net_path = os.path.join(BASE_DIR, "../../convnet/mnist/convnet.pkl")
-        mnist_net_path = os.path.join(BASE_DIR, "../../convnet/mnist/convnet_test.pkl")
+        mnist_net_path = os.path.join(BASE_DIR, "../../convnet/mnist/convnet.pkl")
+        # mnist_net_path = os.path.join(BASE_DIR, "../../convnet/mnist/convnet_test.pkl")
         net = self.net.load_net(mnist_net_path)
         self.application.net.replace(net)
 
@@ -124,6 +124,7 @@ class ApiPredict(ApiHandler):
     def post(self):
         image = self.require_arg('image', field_type=list)
         image_3d = arr_2d_to_3d(np.asarray(image))
+
         res = self.net.predict(image_3d).reshape(-1)
         res_max = res.argmax()
 
@@ -142,7 +143,7 @@ class ApiPredict(ApiHandler):
             for y in xrange(layer_out.shape[1]):
                 yarr = []
                 for x in xrange(layer_out.shape[0]):
-                    yarr.append(layer_out[x, y, z])
+                    yarr.append(layer_out[y, x, z])
                 zarr.append(yarr)
             arr.append(zarr)
         return arr
