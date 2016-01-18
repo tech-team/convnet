@@ -114,48 +114,14 @@ class _ConvolutionalLayer(_BaseLayer):
 
         s = self.settings.stride
 
-        self.prev_out = convnetlib.conv_forward(padded_data, self.w, self.b, s, self.settings.filter_size,
-                                                self.prev_out)
-
-        # for f in xrange(self.prev_out.shape[2]):
-        #     for y in xrange(self.prev_out.shape[1]):
-        #         for x in xrange(self.prev_out.shape[0]):
-        #
-        #             conv = 0.0
-        #             for i in xrange(0, self.settings.filter_size):
-        #                 for j in xrange(0, self.settings.filter_size):
-        #                     for z in xrange(0, self.settings.in_depth):
-        #                         conv += padded_data[s * x + i, s * y + j, z] * self.w[f][i, j, z]
-        #
-        #             self.prev_out[x, y, f] = self.b[f] + conv
-
+        self.prev_out = convnetlib.conv_forward(padded_data, self.w, self.b, s, self.prev_out)
         return self.prev_out
 
     def backward(self, current_layer_delta):
         if self.is_output:
             current_layer_delta = self.prev_out - current_layer_delta
 
-        # calc dE/dW
-        for f in xrange(len(self.w)):
-            for z in xrange(self.w[f].shape[2]):
-                for y in xrange(self.w[f].shape[1]):
-                    for x in xrange(self.w[f].shape[0]):
-
-                        conv = 0.0
-                        for i in xrange(current_layer_delta.shape[0]):
-                            for j in xrange(current_layer_delta.shape[1]):
-                                conv += current_layer_delta[i, j, f] * self.prev_layer.prev_out[i + x, j + y, z]
-
-                        self.dw[f][x, y, z] += conv
-
-        # calc dE/dB
-        for f in xrange(len(self.b)):
-            conv = 0.0
-            for i in xrange(current_layer_delta.shape[0]):
-                for j in xrange(current_layer_delta.shape[1]):
-                    conv += current_layer_delta[i, j, f]
-
-            self.db[f] += conv
+        convnetlib.conv_backward(current_layer_delta, self.prev_layer.prev_out, self.dw, self.db)
 
         # calc delta
         prev_layer_delta = self.compute_prev_layer_delta(current_layer_delta)

@@ -1,5 +1,6 @@
 import abc
 
+import convnetlib
 import numpy as np
 
 from convnet.convnet_error import ConvNetError
@@ -131,19 +132,8 @@ class _BaseLayer(object):
         if self.prev_layer.is_input:
             return None
 
-        delta = self._prev_delta_reuse
-        for z in xrange(delta.shape[2]):
-            for y in xrange(delta.shape[1]):
-                for x in xrange(delta.shape[0]):
-                    conv = 0.0
-                    for i in xrange(0, current_layer_delta.shape[0]):
-                        for j in xrange(0, current_layer_delta.shape[1]):
-                            w_shape = self.w[0].shape
-                            if 0 <= x - i < w_shape[0] and 0 <= y - j < w_shape[1]:
-                                for f in xrange(0, current_layer_delta.shape[2]):
-                                    conv += current_layer_delta[i, j, f] * self.w[f][x - i, y - j, z]
-                    delta[x, y, z] = conv
-        return delta
+        self._prev_delta_reuse = convnetlib.conv_prev_layer_delta(current_layer_delta, self.w, self._prev_delta_reuse)
+        return self._prev_delta_reuse
 
     @abc.abstractmethod
     def backward(self, current_layer_delta):

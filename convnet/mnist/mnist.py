@@ -72,26 +72,26 @@ def mnist():
 
     X_train, Y_train = train_set
 
-    X_train, Y_train = get_examples(X_train, Y_train, labels=np.arange(0, 10), count=5)
+    X_train, Y_train = get_examples(X_train, Y_train, labels=np.arange(0, 10), count=10)
     X_train, Y_train = shuffle_in_unison_inplace(X_train, Y_train)
     X_train = transform_X(X_train)
     Y_train = transform_Y(Y_train)
 
     X_test, Y_test = test_set
-    X_test, Y_test = get_examples(X_test, Y_test, labels=np.arange(0, 10), count=2)
+    X_test, Y_test = get_examples(X_test, Y_test, labels=np.arange(0, 10), count=10)
     X_test, Y_test = shuffle_in_unison_inplace(X_test, Y_test)
     X_test = transform_X(X_test)
     Y_test = transform_Y(Y_test)
 
-    net = ConvNet(iterations_count=30, batch_size=10, learning_rate=0.001, momentum=0.8, weight_decay=0.001)
+    net = ConvNet(iterations_count=1, batch_size=10, learning_rate=0.001, momentum=0.8, weight_decay=0.001)
     net.setup_layers([
         InputLayer(InputLayerSettings(in_shape=X_train[0].shape)),
 
-        ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=16, filter_size=5, stride=1, zero_padding=0)),
+        ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=8, filter_size=5, stride=1, zero_padding=0)),
         ReluLayer(ReluLayerSettings(activation='max')),
         PoolingLayer(PoolingLayerSettings(filter_size=2, stride=2)),
 
-        ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=8, filter_size=5, stride=1, zero_padding=0)),
+        ConvolutionalLayer(ConvolutionalLayerSettings(filters_count=16, filter_size=5, stride=1, zero_padding=0)),
         ReluLayer(ReluLayerSettings(activation='max')),
         PoolingLayer(PoolingLayerSettings(filter_size=3, stride=3)),
 

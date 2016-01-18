@@ -9,5 +9,5 @@ w = [np.zeros((filter_size, filter_size, 1)) for _ in xrange(filters_count)]
 b = [0] * filters_count
 
 out = np.zeros((24, 24, filters_count))
-res = convnetlib.conv_forward(X, w, b, s, filter_size, out)
-
+res = convnetlib.conv_forward(X, w, b, s, out)
+# print(convnetlib.test(out))
