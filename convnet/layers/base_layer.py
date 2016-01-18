@@ -89,7 +89,7 @@ class _BaseLayer(object):
         self.prev_layer = None
         self.next_layer = None
 
-        self.prev_out = np.empty(self.settings.out_shape)
+        self.prev_out = np.empty(self.settings.out_shape, dtype='double')
         self._prev_delta_reuse = None
 
     def setup_layers(self, prev_layer, next_layer=None):

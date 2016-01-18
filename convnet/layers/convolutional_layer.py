@@ -3,6 +3,7 @@ import numpy as np
 from convnet import utils
 from convnet.convnet_error import ConvNetError
 from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings, BaseLayer
+import convnetlib
 
 
 class ConvolutionalLayerSettings(BaseLayerSettings):
@@ -54,7 +55,6 @@ class ConvolutionalLayerSettings(BaseLayerSettings):
 
 
 class _ConvolutionalLayer(_BaseLayer):
-
     EPSILON = 0.3
 
     def __init__(self, settings, net_settings=None):
@@ -68,8 +68,8 @@ class _ConvolutionalLayer(_BaseLayer):
         w_shape = (f, f, settings.in_depth)
 
         def new_w(shape):
-            return np.random.uniform(low=-self.EPSILON, high=self.EPSILON, size=(np.prod(np.asarray(shape)),))\
-                            .reshape(shape)
+            return np.random.uniform(low=-self.EPSILON, high=self.EPSILON, size=(np.prod(np.asarray(shape)),)) \
+                .reshape(shape)
 
         self.w = [new_w(w_shape) for _ in xrange(settings.filters_count)]
         self.dw = [np.zeros(w_shape) for _ in xrange(len(self.w))]
@@ -114,17 +114,20 @@ class _ConvolutionalLayer(_BaseLayer):
 
         s = self.settings.stride
 
-        for f in xrange(self.prev_out.shape[2]):
-            for y in xrange(self.prev_out.shape[1]):
-                for x in xrange(self.prev_out.shape[0]):
+        self.prev_out = convnetlib.conv_forward(padded_data, self.w, self.b, s, self.settings.filter_size,
+                                                self.prev_out)
 
-                    conv = 0.0
-                    for i in xrange(0, self.settings.filter_size):
-                        for j in xrange(0, self.settings.filter_size):
-                            for z in xrange(0, self.settings.in_depth):
-                                conv += padded_data[s * x + i, s * y + j, z] * self.w[f][i, j, z]
-
-                    self.prev_out[x, y, f] = self.b[f] + conv
+        # for f in xrange(self.prev_out.shape[2]):
+        #     for y in xrange(self.prev_out.shape[1]):
+        #         for x in xrange(self.prev_out.shape[0]):
+        #
+        #             conv = 0.0
+        #             for i in xrange(0, self.settings.filter_size):
+        #                 for j in xrange(0, self.settings.filter_size):
+        #                     for z in xrange(0, self.settings.in_depth):
+        #                         conv += padded_data[s * x + i, s * y + j, z] * self.w[f][i, j, z]
+        #
+        #             self.prev_out[x, y, f] = self.b[f] + conv
 
         return self.prev_out
 

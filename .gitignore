@@ -61,3 +61,4 @@ target/
 convnet_web/node_modules/
 convnet_web/static/components/
 convnet_web/dist
+convnet/convnetlib/build/
