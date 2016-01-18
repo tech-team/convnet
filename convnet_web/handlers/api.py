@@ -1,13 +1,16 @@
 import numpy as np
 import tornado
 import tornado.web
+import os
 
 from convnet.net import ConvNet
-from convnet.utils import to_3d
+from convnet.utils import to_3d, input_2d_to_3d, arr_2d_to_3d
 from convnet_web.handlers import BaseHandler
 
 import convnet.layers
 from convnet.convnet_error import ConvNetError
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class ApiHandler(BaseHandler):
@@ -103,13 +106,39 @@ class ApiConfig(ApiHandler):
             raise tornado.web.MissingArgumentError(arg_name)
 
 
+class ApiConfigMnist(ApiHandler):
+    def post(self):
+        # mnist_net_path = os.path.join(BASE_DIR, "../../convnet/mnist/convnet.pkl")
+        mnist_net_path = os.path.join(BASE_DIR, "../../convnet/mnist/convnet_test.pkl")
+        net = self.net.load_net(mnist_net_path)
+        self.application.net.replace(net)
+
+        self.api_ok()
+
+
 class ApiPredict(ApiHandler):
     def post(self):
         image = self.require_arg('image', field_type=list)
-        image_3d = to_3d(np.asarray(image))
+        image_3d = arr_2d_to_3d(np.asarray(image))
         res = self.net.predict(image_3d).reshape(-1)
         res_max = res.argmax()
+
+        layers_outs = [self.transform_layer_out(l.prev_out) for l in self.net.layers]
+
         self.api_ok({
             'prediction': res_max,
-            'confidence': res[res_max]
+            'confidence': res[res_max],
+            'layers': layers_outs
         })
+
+    def transform_layer_out(self, layer_out):
+        arr = []
+        for z in xrange(layer_out.shape[2]):
+            zarr = []
+            for y in xrange(layer_out.shape[1]):
+                yarr = []
+                for x in xrange(layer_out.shape[0]):
+                    yarr.append(layer_out[x, y, z])
+                zarr.append(yarr)
+            arr.append(zarr)
+        return arr

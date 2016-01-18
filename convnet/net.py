@@ -106,3 +106,8 @@ class ConvNet(object):
         with open(filename, 'rb') as f:
             net = cPickle.load(f)
         return net
+
+    def replace(self, net):
+        self.layers = net.layers
+        self.net_settings = net.net_settings
+        self.last_output = net.last_output
