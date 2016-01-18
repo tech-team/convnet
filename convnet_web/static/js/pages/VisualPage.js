@@ -68,7 +68,7 @@ define([
 
                 this.$result.fadeOut('fast', () => {
                     this.$result.fadeIn('fast', () => {
-                        this.$result.text(data.prediction + '(' + data.confidence + ')');
+                        this.$result.text(parseInt(data.prediction) + ' (' + parseFloat(data.confidence).toFixed(2) + ')');
                         this.display.display(data.layers, 40, 40);
                     });
                 });
@@ -160,7 +160,7 @@ define([
 
             context.strokeStyle = "black";
             context.lineJoin = "round";
-            context.lineWidth = 10;
+            context.lineWidth = 20;
 
             for(var i = 0; i < this.clickX.length; ++i) {
                 context.beginPath();
@@ -219,7 +219,7 @@ define([
                         }
                     }
                     color = color / (scaleX * scaleY);  // average by chunk
-                    line.push(color);
+                    line.push(+(color > 0.5));
                 }
                 m.push(line);
                 console.log(_.map(line, (el) => +(el > 0.5)));

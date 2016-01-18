@@ -112,7 +112,7 @@ class ApiConfig(ApiHandler):
 
 class ApiConfigMnist(ApiHandler):
     def post(self):
-        mnist_net_path = os.path.join(BASE_DIR, "../../convnet/mnist/convnet.pkl")
+        mnist_net_path = os.path.join(BASE_DIR, "../../convnet/mnist/convnet1.pkl")
         # mnist_net_path = os.path.join(BASE_DIR, "../../convnet/mnist/convnet_test.pkl")
         net = self.net.load_net(mnist_net_path)
         self.application.net.replace(net)
