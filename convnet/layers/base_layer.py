@@ -6,6 +6,8 @@ from convnet.convnet_error import ConvNetError
 
 
 class BaseLayerSettings(object):
+    TYPE = 'baselayer'
+
     def __init__(self, in_shape=None):
         super(BaseLayerSettings, self).__init__()
         self._in_shape = in_shape
@@ -62,6 +64,13 @@ class BaseLayerSettings(object):
 
     def in_shape_changed(self):
         pass
+
+    def to_dict(self):
+        return {
+            'type': self.TYPE,
+            'in_shape': list(self.in_shape),
+            'out_shape': list(self.out_shape),
+        }
 
 
 class _BaseLayer(object):

@@ -72,12 +72,12 @@ def mnist():
 
     X_train, Y_train = train_set
 
-    X_train, Y_train = get_examples(X_train, Y_train, labels=np.arange(0, 10), count=30)
+    X_train, Y_train = get_examples(X_train, Y_train, labels=np.arange(0, 10), count=10)
     X_train, Y_train = shuffle_in_unison_inplace(X_train, Y_train)
     X_train = transform_X(X_train)
     Y_train = transform_Y(Y_train)
 
-    net = ConvNet(iterations_count=100, batch_size=10, learning_rate=0.001, momentum=0.8, weight_decay=0.001)
+    net = ConvNet(iterations_count=50, batch_size=10, learning_rate=0.001, momentum=0.8, weight_decay=0.001)
     net.setup_layers([
         InputLayer(InputLayerSettings(in_shape=X_train[0].shape)),
 
@@ -107,10 +107,12 @@ def mnist():
 
     print("Accuracy {}/{}".format(matched, len(X_train[:examples_count])))
 
-    path = "/home/convnet.pkl"
+    path = "./convnet.pkl"
     net.dump_net(path)
     print("Dumped to {}".format(path))
 
 
 if __name__ == "__main__":
     mnist()
+    # net = ConvNet.load_net('/home/igor/Desktop/convnet.pkl')
+    pass

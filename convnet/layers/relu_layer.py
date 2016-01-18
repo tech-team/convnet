@@ -15,12 +15,13 @@ def relu_softmax_deriv(x):
     return 1 / (2 + exps / others + others / exps)
 
 
-
 class ReluLayerSettings(BaseLayerSettings):
-    """
-    activation - string, containing a name of desired activation func (refer to ReluLayer.ACTIVATIONS
-    """
+    TYPE = 'relu'
+
     def __init__(self, in_shape=None, activation='max'):
+        """
+        activation - string, containing a name of desired activation func (refer to ReluLayer.ACTIVATIONS
+        """
         super(ReluLayerSettings, self).__init__(in_shape=in_shape)
         self.activation = activation
         if self.activation not in _ReluLayer.ACTIVATIONS:
@@ -37,6 +38,13 @@ class ReluLayerSettings(BaseLayerSettings):
     @property
     def out_depth(self):
         return self.in_depth
+
+    def to_dict(self):
+        d = super(ReluLayerSettings, self).to_dict()
+        d.update({
+            'activation': self.activation,
+        })
+        return d
 
 
 # noinspection PyCallingNonCallable

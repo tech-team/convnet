@@ -5,28 +5,29 @@ import tornado.web
 import tornado.options
 
 import convnet_web.handlers
-import settings
+import settings as convsettings
 from convnet.net import ConvNet
 
-net = ConvNet()
 
+class Application(tornado.web.Application):
+    def __init__(self):
+        self.net = ConvNet()
+        s = {
+            'debug': convsettings.DEBUG,
+            'template_path': convsettings.TEMPLATES_DIR,
+            'static_path': convsettings.STATIC_DIR,
+            'static_url_prefix': convsettings.STATIC_PREFIX
+        }
 
-def make_app():
-    global net
-    s = {
-        'debug': settings.DEBUG,
-        'template_path': settings.TEMPLATES_DIR,
-        'static_path': settings.STATIC_DIR,
-        'static_url_prefix': settings.STATIC_PREFIX
-    }
+        handlers = [
+            (r"/", convnet_web.handlers.VisualHandler),
+            (r"/config", convnet_web.handlers.ConfigHandler),
 
-    return tornado.web.Application([
-        (r"/", convnet_web.handlers.VisualHandler),
-        (r"/config", convnet_web.handlers.ConfigHandler),
-
-        (r"/api/config", convnet_web.handlers.ApiConfig, dict(net=net)),
-        (r"/api/predict", convnet_web.handlers.ApiPredict, dict(net=net)),
-    ], **s)
+            (r"/api/config", convnet_web.handlers.ApiConfig, dict(net=self.net)),
+            (r"/api/config_mnist", convnet_web.handlers.ApiConfigMnist, dict(net=self.net)),
+            (r"/api/predict", convnet_web.handlers.ApiPredict, dict(net=self.net)),
+        ]
+        super(Application, self).__init__(handlers, **s)
 
 
 if __name__ == "__main__":
@@ -36,7 +37,7 @@ if __name__ == "__main__":
     tornado.options.define('port', type=int, default=8888)
     opts = tornado.options.options
 
-    app = make_app()
+    app = Application()
     app.listen(opts.port, address=opts.host)
 
     logging.info("Server started on %s:%d", opts.host, opts.port)

@@ -12,6 +12,15 @@ class ConvNetSettings(object):
         self.batch_size = None
         self.weight_decay = None
 
+    def to_dict(self):
+        return {
+            'iterations_count': self.iterations_count,
+            'learning_rate': self.learning_rate,
+            'momentum': self.momentum,
+            'batch_size': self.batch_size,
+            'weight_decay': self.weight_decay,
+        }
+
 
 class ConvNet(object):
     def __init__(self, iterations_count=10, learning_rate=0.01, momentum=0, batch_size=1, weight_decay=0):
@@ -106,3 +115,15 @@ class ConvNet(object):
         with open(filename, 'rb') as f:
             net = cPickle.load(f)
         return net
+
+    def replace(self, net):
+        self.layers = net.layers
+        self.net_settings = net.net_settings
+        self.last_output = net.last_output
+
+    def to_dict(self):
+        d = self.net_settings.to_dict()
+        d.update({
+            'layers': [l.settings.to_dict() for l in self.layers]
+        })
+        return d
