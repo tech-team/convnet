@@ -105,6 +105,18 @@ def mnist():
     net.fit(X_train[:examples_count], Y_train[:examples_count])
 
     matched = 0
+    for x, y in zip(X_train[:examples_count], Y_train[:examples_count]):
+        h = net.predict(x)
+        h_res = h.argmax()
+        y_res = y.argmax()
+        print("predicted = {}; max = {}".format(h, h.argmax()))
+        print("real =      {}; max = {}".format(y, y.argmax()))
+        print("\n")
+        matched += int(h_res == y_res)
+
+    print("Accuracy train {}/{}".format(matched, len(X_train[:examples_count])))
+
+    matched = 0
     for x, y in zip(X_test[:examples_count], Y_test[:examples_count]):
         h = net.predict(x)
         h_res = h.argmax()
@@ -114,7 +126,7 @@ def mnist():
         print("\n")
         matched += int(h_res == y_res)
 
-    print("Accuracy {}/{}".format(matched, len(X_test[:examples_count])))
+    print("Accuracy test {}/{}".format(matched, len(X_test[:examples_count])))
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     path = os.path.join(BASE_DIR, "./convnet1.pkl")
