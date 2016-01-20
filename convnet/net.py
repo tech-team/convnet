@@ -1,4 +1,7 @@
+from __future__ import print_function
 import cPickle
+
+import numpy as np
 
 from convnet.layers.base_layer import _BaseLayer, BaseLayer
 
@@ -22,6 +25,7 @@ class ConvNetSettings(object):
         }
 
 
+# noinspection PyPep8Naming
 class ConvNet(object):
     def __init__(self, iterations_count=10, learning_rate=0.01, momentum=0, batch_size=1, weight_decay=0):
         super(ConvNet, self).__init__()
@@ -69,22 +73,28 @@ class ConvNet(object):
 
         self.layers = layers
 
-    def fit(self, X, Y):
-        assert len(X) == len(Y)
+    def fit(self, X_train, Y_train, X_cross, Y_cross):
+        assert len(X_train) == len(Y_train)
+        assert len(X_cross) == len(Y_cross)
 
         for iteration in xrange(1, self.net_settings.iterations_count + 1):
-            print("Iteration #{}".format(iteration))
-
+            batch_losses = []
+            train_loss = 0.0
             samples_batch = 0
-            for i, (x, y) in enumerate(zip(X, Y)):
+            for i, (x, y) in enumerate(zip(X_train, Y_train)):
                 # print("{}/{}".format(i + 1, len(X)))
                 samples_batch += 1
 
                 res = x
                 for l in self.layers:
                     res = l.forward(res)
+                    if hasattr(l, 'w'):
+                        train_loss += self.net_settings.weight_decay * l.weights_sum()
 
                 self.last_output = res
+                err = np.sum(self.last_output - y)
+                train_loss += err * err
+
                 res = y
                 for l in reversed(self.layers):
                     res = l.backward(res)
@@ -94,9 +104,32 @@ class ConvNet(object):
                     for l in self.layers:
                         l.update_weights(samples_count=samples_batch)
 
+                    train_loss /= 2.0 * self.net_settings.batch_size
+                    batch_losses.append(train_loss)
+                    train_loss = 0.0
+
             if samples_batch != 0:
                 for l in self.layers:
                     l.update_weights(samples_count=samples_batch)
+
+                train_loss /= 2.0 * len(X_train)
+                batch_losses.append(train_loss)
+
+            train_loss = np.mean(batch_losses)
+
+            cross_loss = 0.0
+            for i, (x, y) in enumerate(zip(X_cross, Y_cross)):
+                res = x
+                for l in self.layers:
+                    res = l.forward(res)
+                    if hasattr(l, 'w'):
+                        cross_loss += self.net_settings.weight_decay * l.weights_sum()
+
+                err = np.sum(res - y)
+                cross_loss += err * err
+            cross_loss /= 2.0 * len(X_cross)
+
+            print("Iteration #{}; train_error = {}; cross_error = {}".format(iteration, train_loss, cross_loss))
 
     def predict(self, X):
         res = X

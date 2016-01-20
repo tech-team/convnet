@@ -71,19 +71,24 @@ def mnist():
     f.close()
 
     X_train, Y_train = train_set
-
-    X_train, Y_train = get_examples(X_train, Y_train, labels=np.arange(0, 10), count=30)
+    X_train, Y_train = get_examples(X_train, Y_train, labels=np.arange(0, 10), count=50)
     X_train, Y_train = shuffle_in_unison_inplace(X_train, Y_train)
     X_train = transform_X(X_train)
     Y_train = transform_Y(Y_train)
 
+    X_cv, Y_cv = train_set
+    X_cv, Y_cv = get_examples(X_cv, Y_cv, labels=np.arange(0, 10), count=5)
+    X_cv, Y_cv = shuffle_in_unison_inplace(X_cv, Y_cv)
+    X_cv = transform_X(X_cv)
+    Y_cv = transform_Y(Y_cv)
+
     X_test, Y_test = test_set
-    X_test, Y_test = get_examples(X_test, Y_test, labels=np.arange(0, 10), count=30)
+    X_test, Y_test = get_examples(X_test, Y_test, labels=np.arange(0, 10), count=50)
     X_test, Y_test = shuffle_in_unison_inplace(X_test, Y_test)
     X_test = transform_X(X_test)
     Y_test = transform_Y(Y_test)
 
-    net = ConvNet(iterations_count=100, batch_size=10, learning_rate=0.001, momentum=0.8, weight_decay=0.001)
+    net = ConvNet(iterations_count=500, batch_size=20, learning_rate=0.001, momentum=0.9, weight_decay=0.001)
     net.setup_layers([
         InputLayer(InputLayerSettings(in_shape=X_train[0].shape)),
 
@@ -98,34 +103,32 @@ def mnist():
         FullConnectedLayer(FullConnectedLayerSettings(neurons_count=Y_train[0].shape[-1], activation='sigmoid')),
     ])
 
-    examples_count = 100000
-
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     # net = ConvNet.load_net(os.path.join(BASE_DIR, './convnet1.pkl'))
-    net.fit(X_train[:examples_count], Y_train[:examples_count])
+    net.fit(X_train, Y_train, X_cv, Y_cv)
 
     train_matched = 0
-    for x, y in zip(X_train[:examples_count], Y_train[:examples_count]):
+    for x, y in zip(X_train, Y_train):
         h = net.predict(x)
         h_res = h.argmax()
         y_res = y.argmax()
-        print("predicted = {}; max = {}".format(h, h.argmax()))
-        print("real =      {}; max = {}".format(y, y.argmax()))
-        print("\n")
+        # print("predicted = {}; max = {}".format(h, h.argmax()))
+        # print("real =      {}; max = {}".format(y, y.argmax()))
+        # print("\n")
         train_matched += int(h_res == y_res)
 
     test_matched = 0
-    for x, y in zip(X_test[:examples_count], Y_test[:examples_count]):
+    for x, y in zip(X_test, Y_test):
         h = net.predict(x)
         h_res = h.argmax()
         y_res = y.argmax()
-        print("predicted = {}; max = {}".format(h, h.argmax()))
-        print("real =      {}; max = {}".format(y, y.argmax()))
-        print("\n")
+        # print("predicted = {}; max = {}".format(h, h.argmax()))
+        # print("real =      {}; max = {}".format(y, y.argmax()))
+        # print("\n")
         test_matched += int(h_res == y_res)
 
-    print("Accuracy train {}/{}".format(train_matched, len(X_train[:examples_count])))
-    print("Accuracy test {}/{}".format(test_matched, len(X_test[:examples_count])))
+    print("Accuracy train {}/{}".format(train_matched, len(X_train)))
+    print("Accuracy test {}/{}".format(test_matched, len(X_test)))
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     path = os.path.join(BASE_DIR, "./convnet1.pkl")

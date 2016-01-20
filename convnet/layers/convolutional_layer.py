@@ -147,6 +147,12 @@ class _ConvolutionalLayer(_BaseLayer):
             self.dw[f] = np.zeros(self.dw[f].shape)
             self.db[f] = 0
 
+    def weights_sum(self):
+        s = 0.0
+        for f in xrange(len(self.w)):
+            s += np.sum(self.w[f] * self.w[f])
+        return s
+
 
 class ConvolutionalLayer(BaseLayer):
     def __init__(self, settings):
