@@ -4,7 +4,6 @@
 #define NO_IMPORT_ARRAY
 #define PY_ARRAY_UNIQUE_SYMBOL convnetlib_ARRAY_API
 #include <numpy/arrayobject.h>
-#include <stdbool.h>
 #include <stdio.h>
 
 #include "util.h"
@@ -47,15 +46,17 @@ PyObject* pool_forward(PyObject* self, PyObject* args) {
     int k0 = 0,
         k1 = 0;
         
-    for (int x = 0; x < out_shape[0]; ++x) {
+    int x, y, z,
+        i, j;
+    for (x = 0; x < out_shape[0]; ++x) {
         int x_offset = x * stride;
         k1 = 0;
-        for (int y = 0; y < out_shape[1]; ++y) {
+        for (y = 0; y < out_shape[1]; ++y) {
             int y_offset = y * stride;
-            for (int z = 0; z < out_shape[2]; ++z) {
+            for (z = 0; z < out_shape[2]; ++z) {
                 
                 
-                // searching max_index
+                /* searching max_index */
                 int max_i = x_offset,
                     max_j = y_offset;
                 double max_value = -1;
@@ -63,8 +64,8 @@ PyObject* pool_forward(PyObject* self, PyObject* args) {
                     max_j < data_shape[1] && max_j < y_offset + f) {
                     
                     max_value = data[max_i][max_j][z];
-                    for (int i = x_offset; i < data_shape[0] && i < x_offset + f; ++i) {
-                        for (int j = y_offset; j < data_shape[1] && j < y_offset + f; ++j) {
+                    for (i = x_offset; i < data_shape[0] && i < x_offset + f; ++i) {
+                        for (j = y_offset; j < data_shape[1] && j < y_offset + f; ++j) {
                             double value = data[i][j][z];
                             if (value > max_value) {
                                 max_i = i;
@@ -76,13 +77,16 @@ PyObject* pool_forward(PyObject* self, PyObject* args) {
                     
                     out[k0][k1][z] = max_value;
                     
-                    void* item_ptr_0 = PyArray_GETPTR4((PyArrayObject*) max_indices_array, k0, k1, z, 0);
-                    void* item_ptr_1 = PyArray_GETPTR4((PyArrayObject*) max_indices_array, k0, k1, z, 1);
+                    void* item_ptr_0;
+                    void* item_ptr_1;
                     
-                    if (PyArray_SETITEM((PyArrayObject*) max_indices_array, item_ptr_0, PyInt_FromLong((long) max_i)) < 0) {
+                    item_ptr_0 = PyArray_GETPTR4((PyArrayObject*) max_indices_array, k0, k1, z, 0);
+                    item_ptr_1 = PyArray_GETPTR4((PyArrayObject*) max_indices_array, k0, k1, z, 1);
+                    
+                    if (PyArray_SETITEM((PyArrayObject*) max_indices_array, (char*) item_ptr_0, PyInt_FromLong((long) max_i)) < 0) {
                         goto fail;
                     }
-                    if (PyArray_SETITEM((PyArrayObject*) max_indices_array, item_ptr_1, PyInt_FromLong((long) max_j)) < 0) {
+                    if (PyArray_SETITEM((PyArrayObject*) max_indices_array, (char*) item_ptr_1, PyInt_FromLong((long) max_j)) < 0) {
                         goto fail;
                     }
                 }
@@ -127,18 +131,23 @@ PyObject* pool_prev_layer_delta(PyObject* self, PyObject* args) {
         goto fail;
     }
     
-    for (int x = 0; x < current_layer_delta_shape[0]; ++x) {
-        for (int y = 0; y < current_layer_delta_shape[1]; ++y) {
-            for (int z = 0; z < current_layer_delta_shape[2]; ++z) {
+    void *item_ptr_0, *item_ptr_1;
+    PyObject *max_i_obj, *max_j_obj;
+    long max_i, max_j;
+    
+    int x, y, z;
+    for (x = 0; x < current_layer_delta_shape[0]; ++x) {
+        for (y = 0; y < current_layer_delta_shape[1]; ++y) {
+            for (z = 0; z < current_layer_delta_shape[2]; ++z) {
                 
-                void* item_ptr_0 = PyArray_GETPTR4((PyArrayObject*) max_indices_array, x, y, z, 0);
-                void* item_ptr_1 = PyArray_GETPTR4((PyArrayObject*) max_indices_array, x, y, z, 1);
+                item_ptr_0 = PyArray_GETPTR4((PyArrayObject*) max_indices_array, x, y, z, 0);
+                item_ptr_1 = PyArray_GETPTR4((PyArrayObject*) max_indices_array, x, y, z, 1);
                 
-                PyObject* max_i_obj = PyArray_GETITEM((PyArrayObject*) max_indices_array, item_ptr_0);
-                PyObject* max_j_obj = PyArray_GETITEM((PyArrayObject*) max_indices_array, item_ptr_1);
+                max_i_obj = PyArray_GETITEM((PyArrayObject*) max_indices_array, (char*) item_ptr_0);
+                max_j_obj = PyArray_GETITEM((PyArrayObject*) max_indices_array, (char*) item_ptr_1);
                 
-                long max_i = PyInt_AsLong(max_i_obj);
-                long max_j = PyInt_AsLong(max_j_obj);
+                max_i = PyInt_AsLong(max_i_obj);
+                max_j = PyInt_AsLong(max_j_obj);
                 
                 out[max_i][max_j][z] = current_layer_delta[x][y][z];
             }

@@ -16,7 +16,9 @@ module = Extension('convnetlib',
                        local_file('pool.c'),
                        local_file('convnetlib.c'),
                    ],
-                   include_dirs=[np.get_include(), local_file('.')])
+                   include_dirs=[np.get_include(), local_file('.')],
+                   # extra_compile_args=['-std=c90'],
+                   )
 
 # run the setup
 setup(name='convnetlib',
