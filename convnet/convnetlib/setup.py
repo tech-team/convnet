@@ -21,15 +21,18 @@ c_files = [
     'convnetlib.c'
 ]
 
-# Make VS treat VS .c files as .cpp
+# Make VS treat *.c files as *.cpp
 # (/TP flag being ignored)
+tmp_dir = None
 if platform.system() == 'Windows':
-    dir = './tmp'
-    os.mkdir(dir)
+    tmp_dir = local_file('./tmp')
+    if os.path.isdir(tmp_dir):
+        shutil.rmtree(tmp_dir)
+    os.mkdir(tmp_dir)
     cpp_files = map(lambda f: 'tmp/' + f + 'pp', c_files)
     
     for i in range(len(c_files)):
-        shutil.copy(c_files[i], cpp_files[i])    
+        shutil.copy(local_file(c_files[i]), local_file(cpp_files[i]))
     
     c_files = cpp_files
 
