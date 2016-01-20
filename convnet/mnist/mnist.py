@@ -72,18 +72,18 @@ def mnist():
 
     X_train, Y_train = train_set
 
-    X_train, Y_train = get_examples(X_train, Y_train, labels=np.arange(0, 10), count=10)
+    X_train, Y_train = get_examples(X_train, Y_train, labels=np.arange(0, 10), count=30)
     X_train, Y_train = shuffle_in_unison_inplace(X_train, Y_train)
     X_train = transform_X(X_train)
     Y_train = transform_Y(Y_train)
 
     X_test, Y_test = test_set
-    X_test, Y_test = get_examples(X_test, Y_test, labels=np.arange(0, 10), count=10)
+    X_test, Y_test = get_examples(X_test, Y_test, labels=np.arange(0, 10), count=30)
     X_test, Y_test = shuffle_in_unison_inplace(X_test, Y_test)
     X_test = transform_X(X_test)
     Y_test = transform_Y(Y_test)
 
-    net = ConvNet(iterations_count=1, batch_size=10, learning_rate=0.001, momentum=0.8, weight_decay=0.001)
+    net = ConvNet(iterations_count=100, batch_size=10, learning_rate=0.001, momentum=0.8, weight_decay=0.001)
     net.setup_layers([
         InputLayer(InputLayerSettings(in_shape=X_train[0].shape)),
 
@@ -104,7 +104,7 @@ def mnist():
     # net = ConvNet.load_net(os.path.join(BASE_DIR, './convnet1.pkl'))
     net.fit(X_train[:examples_count], Y_train[:examples_count])
 
-    matched = 0
+    train_matched = 0
     for x, y in zip(X_train[:examples_count], Y_train[:examples_count]):
         h = net.predict(x)
         h_res = h.argmax()
@@ -112,11 +112,9 @@ def mnist():
         print("predicted = {}; max = {}".format(h, h.argmax()))
         print("real =      {}; max = {}".format(y, y.argmax()))
         print("\n")
-        matched += int(h_res == y_res)
+        train_matched += int(h_res == y_res)
 
-    print("Accuracy train {}/{}".format(matched, len(X_train[:examples_count])))
-
-    matched = 0
+    test_matched = 0
     for x, y in zip(X_test[:examples_count], Y_test[:examples_count]):
         h = net.predict(x)
         h_res = h.argmax()
@@ -124,9 +122,10 @@ def mnist():
         print("predicted = {}; max = {}".format(h, h.argmax()))
         print("real =      {}; max = {}".format(y, y.argmax()))
         print("\n")
-        matched += int(h_res == y_res)
+        test_matched += int(h_res == y_res)
 
-    print("Accuracy test {}/{}".format(matched, len(X_test[:examples_count])))
+    print("Accuracy train {}/{}".format(train_matched, len(X_train[:examples_count])))
+    print("Accuracy test {}/{}".format(test_matched, len(X_test[:examples_count])))
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     path = os.path.join(BASE_DIR, "./convnet1.pkl")

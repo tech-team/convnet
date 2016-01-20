@@ -10,7 +10,12 @@ def local_file(filename):
 
 # define the extension module
 module = Extension('convnetlib',
-                   sources=[local_file('convnetlib.c')],
+                   sources=[
+                       local_file('util.c'),
+                       # local_file('pool.c'),
+                       local_file('conv.c'),
+                       local_file('convnetlib.c'),
+                   ],
                    include_dirs=[np.get_include(), local_file('.')])
 
 # run the setup
