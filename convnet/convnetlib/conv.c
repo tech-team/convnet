@@ -1,5 +1,6 @@
 #include "conv.h"
 
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define NO_IMPORT_ARRAY
 #define PY_ARRAY_UNIQUE_SYMBOL convnetlib_ARRAY_API
 #include <numpy/arrayobject.h>
@@ -15,7 +16,7 @@ PyObject* conv_forward(PyObject* self, PyObject* args) {
 
     /*  parse numpy array argument and value */
     if (!PyArg_ParseTuple(args, "O!O!O!iO!", &PyArray_Type, &X_array,
-                                             &PyList_Type, &w,  // lsit of numpy arrays
+                                             &PyList_Type, &w,  // list of numpy arrays
                                              &PyList_Type, &b,  // list of numbers
                                              &stride,
                                              &PyArray_Type, &out_array
@@ -26,7 +27,6 @@ PyObject* conv_forward(PyObject* self, PyObject* args) {
     int filters_count_w = PyList_Size(w);
     int filters_count_b = PyList_Size(b);
     
-    
     if (filters_count_w != filters_count_b || filters_count_w < 0) {
         PyErr_SetString(PyExc_ValueError, "Sizes of w and b have to be the same");
         return NULL;
@@ -34,16 +34,14 @@ PyObject* conv_forward(PyObject* self, PyObject* args) {
     
     npy_intp x_shape[] = {0, 0, 0};
     double*** X = NULL;
-    if (c_array_from_pyarray3d(X_array, &X, (npy_intp*) x_shape) < 0) {
-        PyErr_SetString(PyExc_TypeError, "Error converting X to c array");
-        return NULL;
+    if (c_array_from_pyarray3d(&X_array, &X, (npy_intp*) x_shape) < 0) {
+        goto fail;
     }
     
     npy_intp out_shape[] = {0, 0, 0};
     double*** out = NULL;
-    if (c_array_from_pyarray3d(out_array, &out, (npy_intp*) out_shape) < 0) {
-        PyErr_SetString(PyExc_TypeError, "Error converting out to c array");
-        return NULL;
+    if (c_array_from_pyarray3d(&out_array, &out, (npy_intp*) out_shape) < 0) {
+        goto fail;
     }
     
     double*** w_f = NULL;
@@ -54,9 +52,8 @@ PyObject* conv_forward(PyObject* self, PyObject* args) {
         
         double b_f = PyFloat_AsDouble(obj_b_f);
         
-        if (c_array_from_pyarray3d(obj_w_f, &w_f, (npy_intp*) w_f_shape) < 0) {
-            PyErr_SetString(PyExc_TypeError, "Error converting w to c array");
-            return NULL;
+        if (c_array_from_pyarray3d(&obj_w_f, &w_f, (npy_intp*) w_f_shape) < 0) {
+            goto fail;
         }
         
         for (int x = 0; x < out_shape[0]; ++x) {
@@ -75,73 +72,19 @@ PyObject* conv_forward(PyObject* self, PyObject* args) {
                 out[x][y][f] = b_f + conv;
             }
         }
-    }
-    return out_array;
-}
-
-
-PyObject* conv_prev_layer_delta(PyObject* self, PyObject* args) {
-    PyObject* current_layer_delta_array;
-    PyObject* w;
-    PyObject* out_array;
-
-    /*  parse numpy array argument and value */
-    if (!PyArg_ParseTuple(args, "O!O!O!", &PyArray_Type, &current_layer_delta_array,
-                                          &PyList_Type, &w,  // lsit of numpy arrays
-                                          &PyArray_Type, &out_array
-                                          )) {
-        return NULL;
-    }
-    
-    npy_intp current_layer_delta_shape[] = {0, 0, 0};
-    double*** current_layer_delta = NULL;
-    if (c_array_from_pyarray3d(current_layer_delta_array, &current_layer_delta, (npy_intp*) current_layer_delta_shape) < 0) {
-        PyErr_SetString(PyExc_TypeError, "Error converting current_layer_delta to c array");
-        return NULL;
-    }
-    // fprintf(stderr, "X shape: %ld %ld %ld\n", x_shape[0], x_shape[1], x_shape[2]);
-    
-    npy_intp out_shape[] = {0, 0, 0};
-    double*** out = NULL;
-    if (c_array_from_pyarray3d(out_array, &out, (npy_intp*) out_shape) < 0) {
-        PyErr_SetString(PyExc_TypeError, "Error converting out to c array");
-        return NULL;
-    }
-    // fprintf(stderr, "out shape: %ld %ld %ld\n", out_shape[0], out_shape[1], out_shape[2]);
-    
-    double*** w_f = NULL;
-    npy_intp w_f_shape[] = {0, 0, 0};
-    for (int f = 0; f < current_layer_delta_shape[2]; ++f) {
-        PyObject* obj_w_f = PyList_GetItem(w, f);
         
-        if (c_array_from_pyarray3d(obj_w_f, &w_f, (npy_intp*) w_f_shape) < 0) {
-            PyErr_SetString(PyExc_TypeError, "Error converting w to c array");
-            return NULL;
-        }
-        // fprintf(stderr, "w[%d] shape: %ld %ld %ld\n", f, w_f_shape[0], w_f_shape[1], w_f_shape[2]);
-        
-        for (int x = 0; x < out_shape[0]; ++x) {
-            for (int y = 0; y < out_shape[1]; ++y) {
-                for (int z = 0; z < out_shape[2]; ++z) {
-                    double conv = 0.0;
-                    
-                    for (int i = 0; i < current_layer_delta_shape[0]; ++i) {
-                        if ((x - i) >= 0 && (x - i) < w_f_shape[0]) {
-                        
-                            for (int j = 0; j < current_layer_delta_shape[1]; ++j) {
-                                if ((y - j) >= 0 && (y - j) < w_f_shape[1]) {
-                                    conv += current_layer_delta[i][j][f] * w_f[x - i][y - j][z];
-                                }
-                            }
-                        }
-                    }
-                    
-                    out[x][y][z] = conv;
-                }
-            }
-        }
+        PyArray_Free(obj_w_f, w_f);
+        w_f = NULL;
     }
-    return out_array;
+    
+    PyArray_Free(X_array, X);
+    PyArray_Free(out_array, out);
+    Py_RETURN_NONE;
+    
+fail:
+    PyArray_Free(X_array, X);
+    PyArray_Free(out_array, out);
+    return NULL;
 }
 
 
@@ -154,23 +97,9 @@ PyObject* conv_backward(PyObject* self, PyObject* args) {
     /*  parse numpy array argument and value */
     if (!PyArg_ParseTuple(args, "O!O!O!O!", &PyArray_Type, &current_layer_delta_array,
                                             &PyArray_Type, &prev_layer_out_array,
-                                            &PyList_Type, &dw,  // lsit of numpy arrays
-                                            &PyList_Type, &db   // lsit of numpy arrays
+                                            &PyList_Type, &dw,  // list of numpy arrays
+                                            &PyList_Type, &db   // list of numpy arrays
                                             )) {
-        return NULL;
-    }
-    
-    npy_intp current_layer_delta_shape[] = {0, 0, 0};
-    double*** current_layer_delta = NULL;
-    if (c_array_from_pyarray3d(current_layer_delta_array, &current_layer_delta, (npy_intp*) current_layer_delta_shape) < 0) {
-        PyErr_SetString(PyExc_TypeError, "Error converting current_layer_delta to c array");
-        return NULL;
-    }
-    
-    npy_intp prev_layer_out_shape[] = {0, 0, 0};
-    double*** prev_layer_out = NULL;
-    if (c_array_from_pyarray3d(prev_layer_out_array, &prev_layer_out, (npy_intp*) prev_layer_out_shape) < 0) {
-        PyErr_SetString(PyExc_TypeError, "Error converting prev_layer_out to c array");
         return NULL;
     }
     
@@ -182,6 +111,21 @@ PyObject* conv_backward(PyObject* self, PyObject* args) {
         return NULL;
     }
     
+    
+    npy_intp current_layer_delta_shape[] = {0, 0, 0};
+    double*** current_layer_delta = NULL;
+    if (c_array_from_pyarray3d(&current_layer_delta_array, &current_layer_delta, (npy_intp*) current_layer_delta_shape) < 0) {
+        goto fail;
+    }
+    
+    npy_intp prev_layer_out_shape[] = {0, 0, 0};
+    double*** prev_layer_out = NULL;
+    if (c_array_from_pyarray3d(&prev_layer_out_array, &prev_layer_out, (npy_intp*) prev_layer_out_shape) < 0) {
+        goto fail;
+    }
+    
+    
+    
     double conv = 0.0;
     double*** dw_f = NULL;
     npy_intp dw_f_shape[] = {0, 0, 0};
@@ -189,9 +133,8 @@ PyObject* conv_backward(PyObject* self, PyObject* args) {
         PyObject* obj_dw_f = PyList_GetItem(dw, f);
         PyObject* obj_db_f = PyList_GetItem(db, f);
         
-        if (c_array_from_pyarray3d(obj_dw_f, &dw_f, (npy_intp*) dw_f_shape) < 0) {
-            PyErr_SetString(PyExc_TypeError, "Error converting dw to c array");
-            return NULL;
+        if (c_array_from_pyarray3d(&obj_dw_f, &dw_f, (npy_intp*) dw_f_shape) < 0) {
+            goto fail;
         }
         
         // calc dE/dW
@@ -219,6 +162,85 @@ PyObject* conv_backward(PyObject* self, PyObject* args) {
         }
         
         obj_db_f = PyNumber_InPlaceAdd(obj_db_f, PyFloat_FromDouble(conv));
+        
+        PyArray_Free(obj_dw_f, dw_f);
+        dw_f = NULL;
     }
+    PyArray_Free(current_layer_delta_array, current_layer_delta);
+    PyArray_Free(prev_layer_out_array, prev_layer_out);
     Py_RETURN_NONE;
+    
+fail:
+    PyArray_Free(current_layer_delta_array, current_layer_delta);
+    PyArray_Free(prev_layer_out_array, prev_layer_out);
+    return NULL;
+}
+
+
+PyObject* conv_prev_layer_delta(PyObject* self, PyObject* args) {
+    PyObject* current_layer_delta_array;
+    PyObject* w;
+    PyObject* out_array;
+
+    /*  parse numpy array argument and value */
+    if (!PyArg_ParseTuple(args, "O!O!O!", &PyArray_Type, &current_layer_delta_array,
+                                          &PyList_Type, &w,  // list of numpy arrays
+                                          &PyArray_Type, &out_array
+                                          )) {
+        return NULL;
+    }
+    
+    npy_intp current_layer_delta_shape[] = {0, 0, 0};
+    double*** current_layer_delta = NULL;
+    if (c_array_from_pyarray3d(&current_layer_delta_array, &current_layer_delta, (npy_intp*) current_layer_delta_shape) < 0) {
+        goto fail;
+    }
+    
+    npy_intp out_shape[] = {0, 0, 0};
+    double*** out = NULL;
+    if (c_array_from_pyarray3d(&out_array, &out, (npy_intp*) out_shape) < 0) {
+        goto fail;
+    }
+    
+    double*** w_f = NULL;
+    npy_intp w_f_shape[] = {0, 0, 0};
+    for (int f = 0; f < current_layer_delta_shape[2]; ++f) {
+        PyObject* obj_w_f = PyList_GetItem(w, f);
+        
+        if (c_array_from_pyarray3d(&obj_w_f, &w_f, (npy_intp*) w_f_shape) < 0) {
+            goto fail;
+        }
+        
+        for (int x = 0; x < out_shape[0]; ++x) {
+            for (int y = 0; y < out_shape[1]; ++y) {
+                for (int z = 0; z < out_shape[2]; ++z) {
+                    double conv = 0.0;
+                    
+                    for (int i = 0; i < current_layer_delta_shape[0]; ++i) {
+                        if ((x - i) >= 0 && (x - i) < w_f_shape[0]) {
+                        
+                            for (int j = 0; j < current_layer_delta_shape[1]; ++j) {
+                                if ((y - j) >= 0 && (y - j) < w_f_shape[1]) {
+                                    conv += current_layer_delta[i][j][f] * w_f[x - i][y - j][z];
+                                }
+                            }
+                        }
+                    }
+                    
+                    out[x][y][z] = conv;
+                }
+            }
+        }
+        
+        PyArray_Free(obj_w_f, w_f);
+        w_f = NULL;
+    }
+    PyArray_Free(current_layer_delta_array, current_layer_delta);
+    PyArray_Free(out_array, out);
+    Py_RETURN_NONE;
+    
+fail:
+    PyArray_Free(current_layer_delta_array, current_layer_delta);
+    PyArray_Free(out_array, out);
+    return NULL;
 }

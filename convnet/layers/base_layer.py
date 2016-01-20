@@ -132,7 +132,7 @@ class _BaseLayer(object):
         if self.prev_layer.is_input:
             return None
 
-        self._prev_delta_reuse = convnetlib.conv_prev_layer_delta(current_layer_delta, self.w, self._prev_delta_reuse)
+        convnetlib.conv_prev_layer_delta(current_layer_delta, self.w, self._prev_delta_reuse)
         return self._prev_delta_reuse
 
     @abc.abstractmethod

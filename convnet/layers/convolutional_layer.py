@@ -114,7 +114,7 @@ class _ConvolutionalLayer(_BaseLayer):
 
         s = self.settings.stride
 
-        self.prev_out = convnetlib.conv_forward(padded_data, self.w, self.b, s, self.prev_out)
+        convnetlib.conv_forward(padded_data, self.w, self.b, s, self.prev_out)
         return self.prev_out
 
     def backward(self, current_layer_delta):

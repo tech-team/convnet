@@ -1,3 +1,4 @@
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define PY_ARRAY_UNIQUE_SYMBOL convnetlib_ARRAY_API
 
 #include <Python.h>
@@ -12,8 +13,11 @@ static PyObject* __test(PyObject* self, PyObject* args);
 
 PyMethodDef convnetlib_funcs[] = {
     { "conv_forward", (PyCFunction) conv_forward, METH_VARARGS, NULL },
-    { "conv_prev_layer_delta", (PyCFunction) conv_prev_layer_delta, METH_VARARGS, NULL },
     { "conv_backward", (PyCFunction) conv_backward, METH_VARARGS, NULL },
+    { "conv_prev_layer_delta", (PyCFunction) conv_prev_layer_delta, METH_VARARGS, NULL },
+    
+    { "pool_forward", (PyCFunction) pool_forward, METH_VARARGS, NULL },
+    { "pool_prev_layer_delta", (PyCFunction) pool_prev_layer_delta, METH_VARARGS, NULL },
     
     { "__test", (PyCFunction) __test, METH_VARARGS, NULL },
     { NULL, NULL, 0, NULL }
@@ -36,7 +40,7 @@ PyObject* __test(PyObject* self, PyObject* args) {
 
    npy_intp out_shape[] = {0, 0, 0};
    double*** out = NULL;
-   if (c_array_from_pyarray3d(out_array, &out, (npy_intp*) out_shape) < 0) {
+   if (c_array_from_pyarray3d(&out_array, &out, (npy_intp*) out_shape) < 0) {
        PyErr_SetString(PyExc_TypeError, "Error converting out to c array");
        return NULL;
    }

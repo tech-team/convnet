@@ -1,3 +1,4 @@
+import convnetlib
 import numpy as np
 
 from convnet.layers.base_layer import _BaseLayer, BaseLayerSettings, BaseLayer
@@ -44,49 +45,29 @@ class _PoolingLayer(_BaseLayer):
         self._prev_delta_reuse = None
 
     def forward(self, data):
-
-        f = self.settings.filter_size
-        for z in xrange(0, self.settings.out_depth):
-            data_slice = data[:, :, z]
-
-            j = 0
-            for y in xrange(0, self.settings.out_height):
-                y_offset = y * self.settings.stride
-                i = 0
-                for x in xrange(0, self.settings.out_width):
-                    x_offset = x * self.settings.stride
-
-                    piece = data_slice[x_offset:x_offset + f, y_offset:y_offset + f]
-                    max_index = np.unravel_index(piece.argmax(), piece.shape)
-                    self.prev_out[i, j, z] = piece[max_index]
-                    self.max_indices[i, j, z] = tuple(max_index)
-                    i += 1
-                j += 1
+        convnetlib.pool_forward(data,
+                                self.settings.stride, self.settings.filter_size,
+                                self.max_indices, self.prev_out)
 
         return self.prev_out
 
     def compute_prev_layer_delta(self, current_layer_delta):
-        delta = current_layer_delta
-
         res = np.zeros(self.settings.in_shape)
-
-        f = self.settings.filter_size
-        for z in xrange(0, delta.shape[2]):
-            res_slice = res[:, :, z]
-
-            for y in xrange(0, delta.shape[1]):
-                y_offset = y * self.settings.stride
-
-                for x in xrange(0, delta.shape[0]):
-                    x_offset = x * self.settings.stride
-
-                    piece = res_slice[x_offset:x_offset + f, y_offset:y_offset + f]
-
-                    value = delta[x, y, z]
-                    max_index = self.max_indices[x, y, z]
-                    piece[tuple(max_index)] = value
-
+        convnetlib.pool_prev_layer_delta(current_layer_delta,
+                                         self.max_indices, res)
         return res
+
+        # delta = current_layer_delta
+        #
+        # for z in xrange(0, delta.shape[2]):
+        #     res_slice = res[:, :, z]
+        #     for y in xrange(0, delta.shape[1]):
+        #         for x in xrange(0, delta.shape[0]):
+        #             value = delta[x, y, z]
+        #             max_index = self.max_indices[x, y, z]
+        #             res_slice[tuple(max_index)] = value
+        #
+        # return res
 
     def backward(self, current_layer_delta):
         if self.is_output:
