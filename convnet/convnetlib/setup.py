@@ -10,7 +10,7 @@ def local_file(filename):
     return os.path.join(BASE_DIR, filename)
 
 if platform.system() == 'Windows':
-    extra_compile_args = ['/Tp']
+    extra_compile_args = ['/TP']
 else:
     extra_compile_args = []
 
