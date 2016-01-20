@@ -77,7 +77,7 @@ class ConvNet(object):
 
             samples_batch = 0
             for i, (x, y) in enumerate(zip(X, Y)):
-                print("{}/{}".format(i + 1, len(X)))
+                # print("{}/{}".format(i + 1, len(X)))
                 samples_batch += 1
 
                 res = x
