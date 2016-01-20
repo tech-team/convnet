@@ -17,10 +17,10 @@ else:
 # define the extension module
 module = Extension('convnetlib',
                    sources=[
-                       local_file('util.cpp'),
-                       local_file('conv.cpp'),
-                       local_file('pool.cpp'),
-                       local_file('convnetlib.cpp'),
+                       local_file('util.c'),
+                       local_file('conv.c'),
+                       local_file('pool.c'),
+                       local_file('convnetlib.c'),
                    ],
                    include_dirs=[np.get_include(), local_file('.')],
                    extra_compile_args=extra_compile_args,
