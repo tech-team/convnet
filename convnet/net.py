@@ -1,5 +1,6 @@
 from __future__ import print_function
 import cPickle
+import gc
 
 import numpy as np
 
@@ -37,7 +38,6 @@ class ConvNet(object):
                           batch_size=batch_size,
                           weight_decay=weight_decay)
 
-        self.last_output = None
         self.layers = []
 
     def set_settings(self, **settings):
@@ -73,7 +73,7 @@ class ConvNet(object):
 
         self.layers = layers
 
-    def fit(self, X_train, Y_train, X_cross, Y_cross):
+    def fit(self, X_train, Y_train, X_cross=None, Y_cross=None):
         assert len(X_train) == len(Y_train)
         assert len(X_cross) == len(Y_cross)
 
@@ -91,8 +91,7 @@ class ConvNet(object):
                     if hasattr(l, 'w'):
                         train_loss += self.net_settings.weight_decay * l.weights_sum()
 
-                self.last_output = res
-                err = np.sum(self.last_output - y)
+                err = np.mean(res - y)
                 train_loss += err * err
 
                 res = y
@@ -102,32 +101,34 @@ class ConvNet(object):
                 if samples_batch == self.net_settings.batch_size:
                     samples_batch = 0
                     for l in self.layers:
-                        l.update_weights(samples_count=samples_batch)
+                        l.update_weights(samples_count=self.net_settings.batch_size)
 
                     train_loss /= 2.0 * self.net_settings.batch_size
                     batch_losses.append(train_loss)
                     train_loss = 0.0
 
             if samples_batch != 0:
-                for l in self.layers:
-                    l.update_weights(samples_count=samples_batch)
+                # for l in self.layers:
+                #     l.update_weights(samples_count=samples_batch)
 
                 train_loss /= 2.0 * len(X_train)
                 batch_losses.append(train_loss)
 
             train_loss = np.mean(batch_losses)
 
-            cross_loss = 0.0
-            for i, (x, y) in enumerate(zip(X_cross, Y_cross)):
-                res = x
-                for l in self.layers:
-                    res = l.forward(res)
-                    if hasattr(l, 'w'):
-                        cross_loss += self.net_settings.weight_decay * l.weights_sum()
+            cross_loss = None
+            if X_cross is not None and Y_cross is not None:
+                cross_loss = 0.0
+                for i, (x, y) in enumerate(zip(X_cross, Y_cross)):
+                    res = x
+                    for l in self.layers:
+                        res = l.forward(res)
+                        if hasattr(l, 'w'):
+                            cross_loss += self.net_settings.weight_decay * l.weights_sum()
 
-                err = np.sum(res - y)
-                cross_loss += err * err
-            cross_loss /= 2.0 * len(X_cross)
+                    err = np.mean(res - y)
+                    cross_loss += err * err
+                cross_loss /= 2.0 * len(X_cross)
 
             print("Iteration #{}; train_error = {}; cross_error = {}".format(iteration, train_loss, cross_loss))
 
@@ -136,7 +137,6 @@ class ConvNet(object):
         for l in self.layers:
             res = l.forward(res)
 
-        self.last_output = res
         return res
 
     def dump_net(self, filename='convnet.pkl'):

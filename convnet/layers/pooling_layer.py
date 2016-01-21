@@ -57,18 +57,6 @@ class _PoolingLayer(_BaseLayer):
                                          self.max_indices, res)
         return res
 
-        # delta = current_layer_delta
-        #
-        # for z in xrange(0, delta.shape[2]):
-        #     res_slice = res[:, :, z]
-        #     for y in xrange(0, delta.shape[1]):
-        #         for x in xrange(0, delta.shape[0]):
-        #             value = delta[x, y, z]
-        #             max_index = self.max_indices[x, y, z]
-        #             res_slice[tuple(max_index)] = value
-        #
-        # return res
-
     def backward(self, current_layer_delta):
         if self.is_output:
             current_layer_delta = self.prev_out - current_layer_delta
@@ -76,7 +64,7 @@ class _PoolingLayer(_BaseLayer):
 
     def update_weights(self, samples_count=None):
         super(_PoolingLayer, self).update_weights(samples_count)
-        self.max_indices = np.zeros(self.max_indices.shape)
+        self.max_indices = np.zeros(self.settings.out_shape, dtype=(int, 2))
 
 
 class PoolingLayer(BaseLayer):

@@ -50,7 +50,6 @@ class _FullConnectedLayer(_ConvolutionalLayer):
         return self.relu.compute_prev_layer_delta(prev_delta)
 
 
-
 class FullConnectedLayer(BaseLayer):
     def __init__(self, settings):
         """

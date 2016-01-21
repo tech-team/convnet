@@ -162,7 +162,10 @@ PyObject* conv_backward(PyObject* self, PyObject* args) {
             }
         }
         
-        obj_db_f = PyNumber_InPlaceAdd(obj_db_f, PyFloat_FromDouble(conv));
+        PyObject* conv_obj = PyFloat_FromDouble(conv);
+        obj_db_f = PyNumber_InPlaceAdd(obj_db_f, conv_obj);
+        Py_DECREF(conv_obj);
+        Py_DECREF(obj_db_f);
         
         PyArray_Free(obj_dw_f, dw_f);
         dw_f = NULL;
