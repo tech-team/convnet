@@ -168,7 +168,7 @@ class ConvNet(object):
         elif current_loss > prev_loss:
             return "{}{}{}".format(bcolors.RED, current_loss, bcolors.NOCOLOR)
         else:
-            return current_loss
+            return "{}{}{}".format(bcolors.BLUE, current_loss, bcolors.NOCOLOR)
 
     def predict(self, X):
         res = X
@@ -190,7 +190,6 @@ class ConvNet(object):
     def replace(self, net):
         self.layers = net.layers
         self.net_settings = net.net_settings
-        self.last_output = net.last_output
 
     def to_dict(self):
         d = self.net_settings.to_dict()
