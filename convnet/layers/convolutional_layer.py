@@ -134,7 +134,7 @@ class _ConvolutionalLayer(_BaseLayer):
         weight_decay = self.net_settings.weight_decay
 
         for f in xrange(filters_count):
-            if samples_count:
+            if not samples_count:
                 samples_count = 1.0
 
             self.dw_last[f] = -learn_rate / float(samples_count) * (self.dw[f] + weight_decay * self.w[f]) + momentum * self.dw_last[f]

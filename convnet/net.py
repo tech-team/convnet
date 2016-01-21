@@ -26,6 +26,18 @@ class ConvNetSettings(object):
         }
 
 
+class bcolors:
+    NOCOLOR = '\033[0m'
+    PURPLE = '\033[95m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
 # noinspection PyPep8Naming
 class ConvNet(object):
     def __init__(self, iterations_count=10, learning_rate=0.01, momentum=0, batch_size=1, weight_decay=0):
@@ -39,6 +51,11 @@ class ConvNet(object):
                           weight_decay=weight_decay)
 
         self.layers = []
+        self.current_train_loss = np.inf
+        self.current_cross_loss = np.inf
+
+        self.prev_train_loss = 0.0
+        self.prev_cross_loss = 0.0
 
     def set_settings(self, **settings):
         self.net_settings.iterations_count = settings['iterations_count']
@@ -108,10 +125,10 @@ class ConvNet(object):
                     train_loss = 0.0
 
             if samples_batch != 0:
-                # for l in self.layers:
-                #     l.update_weights(samples_count=samples_batch)
+                for l in self.layers:
+                    l.update_weights(samples_count=samples_batch)
 
-                train_loss /= 2.0 * len(X_train)
+                train_loss /= 2.0 * samples_batch
                 batch_losses.append(train_loss)
 
             train_loss = np.mean(batch_losses)
@@ -130,7 +147,28 @@ class ConvNet(object):
                     cross_loss += err * err
                 cross_loss /= 2.0 * len(X_cross)
 
-            print("Iteration #{}; train_error = {}; cross_error = {}".format(iteration, train_loss, cross_loss))
+            self.prev_train_loss = self.current_train_loss
+            self.prev_cross_loss = self.current_cross_loss
+            self.current_train_loss = train_loss
+            self.current_cross_loss = cross_loss
+            print("{}Iteration #{}{}; train_error = {}; cross_error = {};".format(bcolors.BOLD,
+                                                                                  iteration,
+                                                                                  bcolors.NOCOLOR,
+                                                                                  self.get_colored_error(
+                                                                                          self.current_train_loss,
+                                                                                          self.prev_train_loss),
+                                                                                  self.get_colored_error(
+                                                                                          self.current_cross_loss,
+                                                                                          self.prev_cross_loss)))
+
+    @staticmethod
+    def get_colored_error(current_loss, prev_loss):
+        if current_loss < prev_loss:
+            return "{}{}{}".format(bcolors.GREEN, current_loss, bcolors.NOCOLOR)
+        elif current_loss > prev_loss:
+            return "{}{}{}".format(bcolors.RED, current_loss, bcolors.NOCOLOR)
+        else:
+            return current_loss
 
     def predict(self, X):
         res = X

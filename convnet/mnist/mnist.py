@@ -105,7 +105,10 @@ def mnist():
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     # net = ConvNet.load_net(os.path.join(BASE_DIR, './convnet1.pkl'))
-    net.fit(X_train, Y_train, X_cv, Y_cv)
+    try:
+        net.fit(X_train, Y_train, X_cv, Y_cv)
+    except KeyboardInterrupt:
+        print("Training stopped")
 
     train_matched = 0
     for x, y in zip(X_train, Y_train):
