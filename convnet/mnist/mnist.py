@@ -71,30 +71,30 @@ def mnist():
     f.close()
 
     X_train, Y_train = train_set
-    X_train, Y_train = get_examples(X_train, Y_train, labels=np.arange(0, 10), count=100)
-    X_train, Y_train = shuffle_in_unison_inplace(X_train, Y_train)
+    #X_train, Y_train = get_examples(X_train, Y_train, labels=np.arange(0, 10), count=200)
+    #X_train, Y_train = shuffle_in_unison_inplace(X_train, Y_train)
     X_train = transform_X(X_train)
     Y_train = transform_Y(Y_train)
 
     print("Train set size: {}".format(len(X_train)))
 
-    X_cv, Y_cv = train_set
-    X_cv, Y_cv = get_examples(X_cv, Y_cv, labels=np.arange(0, 10), count=15)
-    X_cv, Y_cv = shuffle_in_unison_inplace(X_cv, Y_cv)
+    X_cv, Y_cv = valid_set
+    #X_cv, Y_cv = get_examples(X_cv, Y_cv, labels=np.arange(0, 10), count=15)
+    #X_cv, Y_cv = shuffle_in_unison_inplace(X_cv, Y_cv)
     X_cv = transform_X(X_cv)
     Y_cv = transform_Y(Y_cv)
 
     print("Cross validation set size: {}".format(len(X_cv)))
 
     X_test, Y_test = test_set
-    X_test, Y_test = get_examples(X_test, Y_test, labels=np.arange(0, 10), count=100)
-    X_test, Y_test = shuffle_in_unison_inplace(X_test, Y_test)
+    #X_test, Y_test = get_examples(X_test, Y_test, labels=np.arange(0, 10), count=100)
+    #X_test, Y_test = shuffle_in_unison_inplace(X_test, Y_test)
     X_test = transform_X(X_test)
     Y_test = transform_Y(Y_test)
 
     print("Test set size: {}".format(len(X_test)))
 
-    net = ConvNet(iterations_count=500, batch_size=20, learning_rate=0.001, momentum=0.9, weight_decay=0.001)
+    net = ConvNet(iterations_count=1000, batch_size=200, learning_rate=0.001, momentum=0.9, weight_decay=0.001)
     net.setup_layers([
         InputLayer(InputLayerSettings(in_shape=X_train[0].shape)),
 
@@ -111,7 +111,7 @@ def mnist():
 
     # net = ConvNet.load_net(os.path.join(script_path, './convnet1.pkl'))
     try:
-        net.fit(X_train, Y_train, X_cv, Y_cv)
+        net.fit(X_train, Y_train)
     except KeyboardInterrupt:
         print("Training stopped")
 

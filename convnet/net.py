@@ -91,8 +91,8 @@ class ConvNet(object):
         self.layers = layers
 
     def fit(self, X_train, Y_train, X_cross=None, Y_cross=None):
-        assert len(X_train) == len(Y_train)
-        assert len(X_cross) == len(Y_cross)
+        #assert len(X_train) == len(Y_train)
+        #assert len(X_cross) == len(Y_cross)
 
         for iteration in xrange(1, self.net_settings.iterations_count + 1):
             batch_losses = []
